@@ -1,10 +1,9 @@
 import os
-
-import cv2
+from cv2 import imread
 
 
 def is_image_aspect_ratio_valid(img_url):
-    img = cv2.imread(img_url)
+    img = imread(img_url)
     dimension = tuple(img.shape[1::-1])
     print("dimensions: " + str(dimension))
     aspect_ratio = dimension[0] / dimension[1]
