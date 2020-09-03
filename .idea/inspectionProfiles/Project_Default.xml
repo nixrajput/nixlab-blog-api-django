@@ -1,0 +1,68 @@
+<component name="InspectionProjectProfileManager">
+  <profile version="1.0">
+    <option name="myName" value="Project Default" />
+    <inspection_tool class="DjangoSafeStringInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="DuplicatedCode" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <Languages>
+        <language minSize="166" name="Python" />
+      </Languages>
+    </inspection_tool>
+    <inspection_tool class="PyAttributeOutsideInitInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="PyCompatibilityInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ourVersions">
+        <value>
+          <list size="4">
+            <item index="0" class="java.lang.String" itemvalue="2.7" />
+            <item index="1" class="java.lang.String" itemvalue="3.7" />
+            <item index="2" class="java.lang.String" itemvalue="3.8" />
+            <item index="3" class="java.lang.String" itemvalue="3.9" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyMethodMayBeStaticInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="PyPackageRequirementsInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredPackages">
+        <value>
+          <list size="10">
+            <item index="0" class="java.lang.String" itemvalue="storages" />
+            <item index="1" class="java.lang.String" itemvalue="appdirs" />
+            <item index="2" class="java.lang.String" itemvalue="six" />
+            <item index="3" class="java.lang.String" itemvalue="django-crispy-forms" />
+            <item index="4" class="java.lang.String" itemvalue="Django" />
+            <item index="5" class="java.lang.String" itemvalue="olefile" />
+            <item index="6" class="java.lang.String" itemvalue="packaging" />
+            <item index="7" class="java.lang.String" itemvalue="djangorestframework" />
+            <item index="8" class="java.lang.String" itemvalue="pyparsing" />
+            <item index="9" class="java.lang.String" itemvalue="Pillow" />
+          </list>
+        </value>
+      </option>
+    </inspection_tool>
+    <inspection_tool class="PyTypeCheckerInspection" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="PyUnresolvedReferencesInspection" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="ignoredIdentifiers">
+        <list>
+          <option value="mainFiles.models.UserProfileImage.objects" />
+          <option value="mainFiles.models.QuestionBook.objects" />
+          <option value="django.contrib.auth.models.User.DoesNotExist" />
+          <option value="mainFiles.models.Question.objects" />
+          <option value="edupoint.models.Question.objects" />
+          <option value="edupoint.models.UserProfileImage.objects" />
+          <option value="nested_admin.NestedTabularInline" />
+          <option value="nested_admin.NestedModelAdmin" />
+          <option value="quiz.models.UsersAnswer.objects" />
+          <option value="quiz.models.Answer.objects" />
+          <option value="edupoint.models.TestPaper.objects" />
+          <option value="edupoint.models.Answer.objects" />
+          <option value="django.db.models.fields.CharField.split" />
+          <option value="django.db.models.fields.related.ForeignKey.*" />
+          <option value="multiplechoice.models.Answer.objects" />
+          <option value="accounts.models.UserProfileImage.objects" />
+          <option value="accounts.models.TeamMember.objects" />
+          <option value="edupoint.models.TestPaper.question_set" />
+        </list>
+      </option>
+    </inspection_tool>
+  </profile>
+</component>
