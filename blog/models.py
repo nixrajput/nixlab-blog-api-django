@@ -8,6 +8,8 @@ from django.dispatch import receiver
 from django.utils.text import slugify
 from django.utils.translation import ugettext_lazy as _
 
+from blog.utils import get_random_alphanumeric_string
+
 
 def upload_location(instance, filename):
     base_filename, file_extension = os.path.splitext(filename)
@@ -52,6 +54,7 @@ class BlogPost(models.Model):
         verbose_name=_("Author")
     )
     slug = models.SlugField(
+        max_length=100,
         blank=True,
         unique=True,
         verbose_name=_("Slug")
@@ -68,7 +71,9 @@ def submission_delete(sender, instance, **kwargs):
 
 def pre_save_blog_post_receiver(sender, instance, *args, **kwargs):
     if not instance.slug:
-        instance.slug = slugify(instance.author.username + "-" + instance.title)
+        rand_str1 = get_random_alphanumeric_string(8)
+        rand_str2 = get_random_alphanumeric_string(8)
+        instance.slug = slugify(rand_str1 + "-" + instance.title + "-" + rand_str2)
 
 
 pre_save.connect(pre_save_blog_post_receiver, sender=BlogPost)

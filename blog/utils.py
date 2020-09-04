@@ -1,5 +1,7 @@
 import os
 from cv2 import imread
+import random
+import string
 
 
 def is_image_aspect_ratio_valid(img_url):
@@ -20,3 +22,9 @@ def is_image_size_valid(img_url, mb_limit):
     if image_size > mb_limit:
         return False
     return True
+
+
+def get_random_alphanumeric_string(length):
+    letters_and_digits = string.ascii_letters + string.digits
+    result_str = ''.join((random.choice(letters_and_digits) for i in range(length)))
+    return result_str

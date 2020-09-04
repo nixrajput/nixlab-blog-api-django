@@ -1,9 +1,12 @@
+import uuid
+
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from rest_framework.authtoken.models import Token
+from django.utils.translation import ugettext_lazy as _
 
 
 class MyAccountManager(BaseUserManager):
@@ -36,6 +39,7 @@ class MyAccountManager(BaseUserManager):
 
 
 class Account(AbstractBaseUser):
+    id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False, auto_created=True)
     email = models.EmailField(verbose_name="email", max_length=60, unique=True)
     username = models.CharField(max_length=30, unique=True)
     date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
@@ -52,6 +56,10 @@ class Account(AbstractBaseUser):
 
     def __str__(self):
         return self.username
+
+    class Meta:
+        verbose_name = _("User")
+        verbose_name_plural = _("All Users")
 
     # For checking permissions. to keep it simple all admin have ALL permissons
     def has_perm(self, perm, obj=None):
