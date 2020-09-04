@@ -4,12 +4,17 @@ from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.generics import UpdateAPIView
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from account.models import Account
-from account.serializers import RegistrationSerializer, AccountPropertiesSerializer, ChangePasswordSerializer
+from account.serializers import (
+    RegistrationSerializer,
+    AccountPropertiesSerializer,
+    ChangePasswordSerializer,
+    LoginSerializer,
+)
 
 
 @api_view(["POST"])
@@ -88,33 +93,66 @@ def update_account_view(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+# class ObtainAuthTokenView(APIView):
+#     authentication_classes = [TokenAuthentication]
+#     permission_classes = [AllowAny]
+#
+#     def post(self, request):
+#
+#         username = request.POST.get('username')
+#         password = request.POST.get('password')
+#         account = authenticate(username=username, password=password)
+#
+#         context = {}
+#
+#         if account:
+#             try:
+#                 token = Token.objects.get(user=account)
+#             except Token.DoesNotExist:
+#                 token = Token.objects.create(user=account)
+#
+#             context['response'] = 'Successfully authenticated!'
+#             context['id'] = account.id
+#             context['username'] = username
+#             context['token'] = token.key
+#             return Response(context, status=status.HTTP_200_OK)
+#         else:
+#             context['response'] = 'Error'
+#             context['error_message'] = 'Invalid credentials!'
+#             return Response(context, status=status.HTTP_400_BAD_REQUEST)
+
+
 class ObtainAuthTokenView(APIView):
-    authentication_classes = []
-    permission_classes = []
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [AllowAny]
 
     def post(self, request):
 
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-        user = authenticate(username=username, password=password)
-
         context = {}
 
-        if user:
-            try:
-                token = Token.objects.get(user=user)
-            except Token.DoesNotExist:
-                token = Token.objects.create(user=user)
+        serializer = LoginSerializer(data=request.data)
 
+        if serializer.is_valid():
+            account = authenticate(
+                username=serializer.data['username'],
+                password=serializer.data['password'],
+            )
+            if not account:
+                context['response'] = 'Error'
+                context['error_message'] = 'Invalid credentials!'
+                return Response(context, status=status.HTTP_404_NOT_FOUND)
+
+            try:
+                token = Token.objects.get(user=account)
+            except Token.DoesNotExist:
+                token = Token.objects.create(user=account)
             context['response'] = 'Successfully authenticated!'
-            context['id'] = user.pk
-            context['username'] = username
+            context['id'] = account.id
+            context['username'] = serializer.data['username']
             context['token'] = token.key
             return Response(context, status=status.HTTP_200_OK)
-        else:
-            context['response'] = 'Error'
-            context['error_message'] = 'Invalid credentials!'
-            return Response(context, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', ])

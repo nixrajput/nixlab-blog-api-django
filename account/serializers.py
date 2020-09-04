@@ -30,6 +30,11 @@ class RegistrationSerializer(ModelSerializer):
         return account
 
 
+class LoginSerializer(Serializer):
+    username = CharField(required=True)
+    password = CharField(required=True)
+
+
 class AccountPropertiesSerializer(ModelSerializer):
     class Meta:
         model = Account
