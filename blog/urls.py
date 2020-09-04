@@ -6,6 +6,7 @@ from blog.views import (
     api_update_blog_view,
     api_delete_blog_view,
     ApiBlogListView,
+    api_is_author_of_blogpost,
 )
 
 app_name = "blog"
@@ -16,4 +17,5 @@ urlpatterns = [
     path('<slug>/', api_detail_blog_view, name="detail"),
     path('<slug>/update/', api_update_blog_view, name="update"),
     path('<slug>/delete/', api_delete_blog_view, name="delete"),
+    path('<slug>/is_author/', api_is_author_of_blogpost, name="is_author"),
 ]
