@@ -1,12 +1,16 @@
 import os
 
 import dj_database_url
+from dotenv import load_dotenv
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+load_dotenv(verbose=True, dotenv_path=os.path.join(BASE_DIR, '.env'))
+
+
 SECRET_KEY = '%%z8+6phy!#ee^v14^90!o6==lklc8ghpim4%m*%piznc-t@j&'
 
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['127.0.0.1', 'nixlab-blog-api.herokuapp.com']
 
@@ -22,6 +26,7 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'account',
     'blog',
+    'storages',
 ]
 
 REST_FRAMEWORK = {
@@ -60,6 +65,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media',
             ],
         },
     },
@@ -109,9 +115,40 @@ DATABASES['default'].update(db_from_env)
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
-STATIC_URL = '/static/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'assets/required_files')
 TEMP = os.path.join(BASE_DIR, 'temp')
+
+
+if DEBUG:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'assets/requiredfiles')
+    MEDIA_URL = '/media/'
+    MEDIA_ROOT = os.path.join(BASE_DIR, 'assets/mediafiles')
+
+else:
+    AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+    AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+
+    AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+    AWS_DEFAULT_ACL = None
+    AWS_S3_CUSTOM_DOMAIN = os.getenv('AWS_S3_CUSTOM_DOMAIN')
+    AWS_S3_OBJECT_PARAMETERS = {'CacheControl': 'max-age=100'}
+
+    AWS_LOCATION = 'static'
+
+    DEFAULT_FILE_STORAGE = 'blogapi.storage_backends.MediaStorage'
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+STATIC_URL = '/static/'
+ADMIN_MEDIA_PREFIX = STATIC_URL + 'admin/'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'assets/staticfiles')
+]
+
+STATICFILES_FINDERS = (
+    'django.contrib.staticfiles.finders.FileSystemFinder',
+    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+)
+
 
 LOGGING = {
     'version': 1,
