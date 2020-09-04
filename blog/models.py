@@ -60,6 +60,10 @@ class BlogPost(models.Model):
         verbose_name=_("Slug")
     )
 
+    class Meta:
+        verbose_name = _("Blog Post")
+        verbose_name_plural = _("Blog Posts")
+
     def __str__(self):
         return self.title
 
