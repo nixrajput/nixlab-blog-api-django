@@ -94,8 +94,8 @@ class ObtainAuthTokenView(APIView):
 
     def post(self, request):
 
-        username = request.POST['username']
-        password = request.POST['password']
+        username = request.POST.get('username')
+        password = request.POST.get('password')
         user = authenticate(username=username, password=password)
 
         context = {}
