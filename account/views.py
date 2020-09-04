@@ -93,11 +93,12 @@ class ObtainAuthTokenView(APIView):
     permission_classes = []
 
     def post(self, request):
-        context = {}
 
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        username = request.POST['username']
+        password = request.POST['password']
         user = authenticate(username=username, password=password)
+
+        context = {}
 
         if user:
             try:
@@ -121,7 +122,7 @@ class ObtainAuthTokenView(APIView):
 @authentication_classes([])
 def does_account_exist_view(request):
     if request.method == 'GET':
-        email = request.GET['email'].lower()
+        email = request.GET['email']
         data = {}
         try:
             account = Account.objects.get(email=email)
