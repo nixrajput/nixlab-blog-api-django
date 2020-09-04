@@ -110,6 +110,7 @@ DATABASES['default'].update(db_from_env)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'assets/required_files')
 TEMP = os.path.join(BASE_DIR, 'temp')
 
 LOGGING = {
