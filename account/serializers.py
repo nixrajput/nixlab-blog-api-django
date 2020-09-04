@@ -1,7 +1,7 @@
 from rest_framework.serializers import (
     ModelSerializer,
     CharField,
-    ValidationError,
+    ValidationError, Serializer,
 )
 
 from account.models import Account
@@ -33,4 +33,10 @@ class RegistrationSerializer(ModelSerializer):
 class AccountPropertiesSerializer(ModelSerializer):
     class Meta:
         model = Account
-        fields = "__all__"
+        fields = ['pk', 'email', 'username', ]
+
+
+class ChangePasswordSerializer(Serializer):
+    old_password = CharField(required=True)
+    new_password = CharField(required=True)
+    confirm_new_password = CharField(required=True)

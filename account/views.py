@@ -1,13 +1,15 @@
 from django.contrib.auth import authenticate
 from rest_framework import status
+from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
+from rest_framework.generics import UpdateAPIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from account.models import Account
-from account.serializers import RegistrationSerializer, AccountPropertiesSerializer
+from account.serializers import RegistrationSerializer, AccountPropertiesSerializer, ChangePasswordSerializer
 
 
 @api_view(["POST"])
@@ -75,17 +77,14 @@ def update_account_view(request):
     except Account.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
-    if request.method == "GET":
-        serializer = AccountPropertiesSerializer(user)
-        return Response(serializer.data)
-
     if request.method == "PUT":
         serializer = AccountPropertiesSerializer(account, data=request.data)
         data = {}
 
         if serializer.is_valid():
             serializer.save()
-            data["response"] = "Account updated!"
+            data['response'] = 'Account update success'
+            return Response(data=data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -115,3 +114,81 @@ class ObtainAuthTokenView(APIView):
             context['response'] = 'Error'
             context['error_message'] = 'Invalid credentials!'
             return Response(context, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', ])
+@permission_classes([])
+@authentication_classes([])
+def does_account_exist_view(request):
+    if request.method == 'GET':
+        email = request.GET['email'].lower()
+        data = {}
+        try:
+            account = Account.objects.get(email=email)
+            data['response'] = email
+        except Account.DoesNotExist:
+            data['response'] = "Account does not exist"
+        return Response(data)
+
+
+@api_view(['GET', ])
+@permission_classes([])
+@authentication_classes([])
+def does_account_exist_view(request):
+
+    if request.method == 'GET':
+        email = request.GET['email'].lower()
+        data = {}
+        try:
+            account = Account.objects.get(email=email)
+            data['response'] = email
+        except Account.DoesNotExist:
+            data['response'] = "Account does not exist"
+        return Response(data)
+
+
+class ChangePasswordView(UpdateAPIView):
+    serializer_class = ChangePasswordSerializer
+    model = Account
+    permission_classes = (IsAuthenticated,)
+    authentication_classes = (TokenAuthentication,)
+
+    def get_object(self, queryset=None):
+        obj = self.request.user
+        return obj
+
+    def update(self, request, *args, **kwargs):
+        self.object = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+
+        if serializer.is_valid():
+            # Check old password
+            if not self.object.check_password(serializer.data.get("old_password")):
+                return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+
+            # confirm the new passwords match
+            new_password = serializer.data.get("new_password")
+            confirm_new_password = serializer.data.get("confirm_new_password")
+            if new_password != confirm_new_password:
+                return Response({"new_password": ["New passwords must match"]}, status=status.HTTP_400_BAD_REQUEST)
+
+            # set_password also hashes the password that the user will get
+            self.object.set_password(serializer.data.get("new_password"))
+            self.object.save()
+            return Response({"response": "successfully changed password"}, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET', ])
+@permission_classes((IsAuthenticated,))
+def account_properties_view(request):
+
+    try:
+        account = request.user
+    except Account.DoesNotExist:
+        return Response(status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == 'GET':
+        serializer = AccountPropertiesSerializer(account)
+        return Response(serializer.data)
