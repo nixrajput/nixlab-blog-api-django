@@ -38,9 +38,10 @@ def registration_view(request):
             data['username'] = account.username
             token = Token.objects.get(user=account).key
             data['token'] = token
+            return Response(data, status=status.HTTP_201_CREATED)
         else:
             data = serializer.errors
-        return Response(data)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
 
 def validate_email(email):
@@ -109,9 +110,8 @@ class ObtainAuthTokenView(APIView):
             context['id'] = user.pk
             context['username'] = username
             context['token'] = token.key
-
+            return Response(context, status=status.HTTP_200_OK)
         else:
             context['response'] = 'Error'
             context['error_message'] = 'Invalid credentials!'
-
-        return Response(context)
+            return Response(context, status=status.HTTP_400_BAD_REQUEST)
