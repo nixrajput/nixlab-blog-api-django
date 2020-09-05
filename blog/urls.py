@@ -1,5 +1,4 @@
 from django.urls import path
-from django.views.decorators.csrf import csrf_exempt
 
 from blog.views import (
     api_detail_blog_view,
@@ -14,7 +13,7 @@ app_name = "blog"
 
 urlpatterns = [
     path('', ApiBlogListView.as_view(), name="list"),
-    path('create/', csrf_exempt(api_create_blog_view), name="create"),
+    path('create/', api_create_blog_view, name="create"),
     path('<slug>/', api_detail_blog_view, name="detail"),
     path('<slug>/update/', api_update_blog_view, name="update"),
     path('<slug>/delete/', api_delete_blog_view, name="delete"),
