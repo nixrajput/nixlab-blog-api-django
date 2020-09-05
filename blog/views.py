@@ -29,9 +29,12 @@ def api_detail_blog_view(request, slug):
     except BlogPost.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
+    serializer = BlogPostSerializer(blog_post)
+
     if request.method == "GET":
-        serializer = BlogPostSerializer(blog_post)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response({'response': serializer.errors, },
+                    status=status.HTTP_400_BAD_REQUEST, )
 
 
 @api_view(["PUT"])

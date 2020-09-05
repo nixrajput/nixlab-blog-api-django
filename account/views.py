@@ -93,35 +93,6 @@ def update_account_view(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-# class ObtainAuthTokenView(APIView):
-#     authentication_classes = [TokenAuthentication]
-#     permission_classes = [AllowAny]
-#
-#     def post(self, request):
-#
-#         username = request.POST.get('username')
-#         password = request.POST.get('password')
-#         account = authenticate(username=username, password=password)
-#
-#         context = {}
-#
-#         if account:
-#             try:
-#                 token = Token.objects.get(user=account)
-#             except Token.DoesNotExist:
-#                 token = Token.objects.create(user=account)
-#
-#             context['response'] = 'Successfully authenticated!'
-#             context['id'] = account.id
-#             context['username'] = username
-#             context['token'] = token.key
-#             return Response(context, status=status.HTTP_200_OK)
-#         else:
-#             context['response'] = 'Error'
-#             context['error_message'] = 'Invalid credentials!'
-#             return Response(context, status=status.HTTP_400_BAD_REQUEST)
-
-
 class ObtainAuthTokenView(APIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [AllowAny]
