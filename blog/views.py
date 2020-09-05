@@ -124,7 +124,7 @@ class ApiBlogListView(ListAPIView):
     serializer_class = BlogPostSerializer
     authentication_classes = (TokenAuthentication,)
     permission_classes = (IsAuthenticated,)
-    # pagination_class = PageNumberPagination
+    pagination_class = PageNumberPagination
     filter_backends = (SearchFilter, OrderingFilter)
     search_fields = ('title', 'body', 'author__username')
 
