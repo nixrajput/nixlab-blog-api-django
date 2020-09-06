@@ -90,7 +90,7 @@ def api_delete_blog_view(request, slug):
         data = {}
         if operation:
             data['response'] = DELETE_SUCCESS
-        return Response(data=data)
+        return Response(data=data, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
