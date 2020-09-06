@@ -27,13 +27,13 @@ def registration_view(request):
         if validate_email(email) is not None:
             data['response'] = "Error"
             data['error_message'] = "This email is already in use."
-            return Response(data)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         username = request.data.get('username', '0')
         if validate_username(username) is not None:
             data['response'] = "Error"
             data['error_message'] = "This username is already in use."
-            return Response(data)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = RegistrationSerializer(data=request.data)
 
@@ -51,22 +51,43 @@ def registration_view(request):
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
 
-def validate_email(email):
-    try:
-        account = Account.objects.get(email=email)
-    except Account.DoesNotExist:
-        return None
-    if account is not None:
-        return email
+class ObtainAuthTokenView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [AllowAny]
 
+    def post(self, request):
 
-def validate_username(username):
-    try:
-        account = Account.objects.get(username=username)
-    except Account.DoesNotExist:
-        return None
-    if account is not None:
-        return username
+        context = {}
+
+        serializer = LoginSerializer(data=request.data)
+
+        username = request.data.get('username', '0')
+        password = request.data.get('password', '0')
+
+        if validate_username(username) is None:
+            context['response'] = "Error"
+            context['error_message'] = "Username is incorrect."
+            return Response(context, status=status.HTTP_404_NOT_FOUND)
+
+        if validate_password(username, password) is False:
+            context['response'] = "Error"
+            context['error_message'] = "Password is incorrect."
+            return Response(context, status=status.HTTP_404_NOT_FOUND)
+
+        if serializer.is_valid():
+            account = authenticate(username=username, password=password)
+
+            try:
+                token = Token.objects.get(user=account)
+            except Token.DoesNotExist:
+                token = Token.objects.create(user=account)
+            context['response'] = 'Successfully authenticated!'
+            context['id'] = account.id
+            context['username'] = serializer.data['username']
+            context['token'] = token.key
+            return Response(context, status=status.HTTP_200_OK)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET", "PUT"])
@@ -90,39 +111,6 @@ def update_account_view(request):
             serializer.save()
             data['response'] = 'Account update success'
             return Response(data=data)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class ObtainAuthTokenView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [AllowAny]
-
-    def post(self, request):
-
-        context = {}
-
-        serializer = LoginSerializer(data=request.data)
-
-        if serializer.is_valid():
-            account = authenticate(
-                username=serializer.data['username'],
-                password=serializer.data['password'],
-            )
-            if not account:
-                context['response'] = 'Error'
-                context['error_message'] = 'Invalid credentials!'
-                return Response(context, status=status.HTTP_404_NOT_FOUND)
-
-            try:
-                token = Token.objects.get(user=account)
-            except Token.DoesNotExist:
-                token = Token.objects.create(user=account)
-            context['response'] = 'Successfully authenticated!'
-            context['id'] = account.id
-            context['username'] = serializer.data['username']
-            context['token'] = token.key
-            return Response(context, status=status.HTTP_200_OK)
-
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -202,3 +190,33 @@ def account_properties_view(request):
     if request.method == 'GET':
         serializer = AccountPropertiesSerializer(account)
         return Response(serializer.data)
+
+
+def validate_email(email):
+    try:
+        account = Account.objects.get(email=email)
+    except Account.DoesNotExist:
+        return None
+    if account is not None:
+        return email
+
+
+def validate_username(username):
+    try:
+        account = Account.objects.get(username=username)
+    except Account.DoesNotExist:
+        return None
+    if account is not None:
+        return username
+
+
+def validate_password(username, password):
+    try:
+        account = Account.objects.get(username=username)
+    except Account.DoesNotExist:
+        raise ValueError("Account does not exist.")
+
+    if account.check_password(password):
+        return True
+    else:
+        return False
