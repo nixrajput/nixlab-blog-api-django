@@ -17,16 +17,20 @@ class BlogPostSerializer(ModelSerializer):
     author = SerializerMethodField()
     image = SerializerMethodField()
     timestamp = SerializerMethodField()
+    author_id = SerializerMethodField()
 
     class Meta:
         model = BlogPost
         fields = [
             "id", "title", "body", "image",
-            "author", "slug", "timestamp"
+            "author", "author_id", "slug", "timestamp"
         ]
 
     def get_author(self, obj):
         return obj.author.username
+
+    def get_author_id(self, obj):
+        return obj.author.id
 
     def get_image(self, obj):
         image = obj.image
@@ -37,9 +41,7 @@ class BlogPostSerializer(ModelSerializer):
 
     def get_timestamp(self, obj):
         date = obj.date_published
-
         format_date = date.strftime("%d %b, %Y")
-
         return format_date
 
 
