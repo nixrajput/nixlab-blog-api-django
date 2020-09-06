@@ -9,8 +9,6 @@ from blog.models import BlogPost
 from blog.utils import is_image_aspect_ratio_valid, is_image_size_valid
 
 IMAGE_SIZE_MAX_BYTES = 1024 * 1024 * 2
-MIN_TITLE_LENGTH = 5
-MIN_BODY_LENGTH = 20
 
 
 class BlogPostSerializer(ModelSerializer):
@@ -56,15 +54,15 @@ class BlogPostUpdateSerializer(ModelSerializer):
             body = blog_post['body']
             image = blog_post['image']
 
-            if len(title) < MIN_TITLE_LENGTH:
-                raise ValidationError({
-                    "response": "Enter a title longer than " + str(MIN_TITLE_LENGTH) + " characters",
-                })
-
-            if len(body) < MIN_BODY_LENGTH:
-                raise ValidationError({
-                    "response": "Enter a body longer than " + str(MIN_BODY_LENGTH) + " characters",
-                })
+            # if len(title) < MIN_TITLE_LENGTH:
+            #     raise ValidationError({
+            #         "response": "Enter a title longer than " + str(MIN_TITLE_LENGTH) + " characters",
+            #     })
+            #
+            # if len(body) < MIN_BODY_LENGTH:
+            #     raise ValidationError({
+            #         "response": "Enter a body longer than " + str(MIN_BODY_LENGTH) + " characters",
+            #     })
 
             url = os.path.join(settings.TEMP, str(image))
             storage = FileSystemStorage(location=url)
@@ -104,15 +102,15 @@ class BlogPostCreateSerializer(ModelSerializer):
             body = self.validated_data['body']
             image = self.validated_data['image']
 
-            if len(title) < MIN_TITLE_LENGTH:
-                raise ValidationError({
-                    "response": "Enter a title longer than " + str(MIN_TITLE_LENGTH) + " characters",
-                })
-
-            if len(body) < MIN_BODY_LENGTH:
-                raise ValidationError({
-                    "response": "Enter a body longer than " + str(MIN_BODY_LENGTH) + " characters",
-                })
+            # if len(title) < MIN_TITLE_LENGTH:
+            #     raise ValidationError({
+            #         "response": "Enter a title longer than " + str(MIN_TITLE_LENGTH) + " characters",
+            #     })
+            #
+            # if len(body) < MIN_BODY_LENGTH:
+            #     raise ValidationError({
+            #         "response": "Enter a body longer than " + str(MIN_BODY_LENGTH) + " characters",
+            #     })
 
             blog_post = BlogPost(
                 author=self.validated_data['author'],
