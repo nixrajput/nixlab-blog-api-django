@@ -16,12 +16,13 @@ MIN_BODY_LENGTH = 20
 class BlogPostSerializer(ModelSerializer):
     author = SerializerMethodField()
     image = SerializerMethodField()
+    timestamp = SerializerMethodField()
 
     class Meta:
         model = BlogPost
         fields = [
             "id", "title", "body", "image",
-            "author", "slug", "date_published"
+            "author", "slug", "timestamp"
         ]
 
     def get_author(self, obj):
@@ -33,6 +34,13 @@ class BlogPostSerializer(ModelSerializer):
         if "?" in new_url:
             new_url = image.url[:image.url.rfind("?")]
         return new_url
+
+    def get_timestamp(self, obj):
+        date = obj.date_published
+
+        format_date = date.strftime("%d %b, %Y")
+
+        return format_date
 
 
 class BlogPostUpdateSerializer(ModelSerializer):
