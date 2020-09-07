@@ -56,6 +56,7 @@ def registration_view(request):
             data['username'] = account.username
             token = Token.objects.get(user=account).key
             data['token'] = token
+            data['timestamp'] = account.timestamp
             return Response(data, status=status.HTTP_201_CREATED)
         else:
             data = serializer.errors
