@@ -13,11 +13,11 @@ from blog.serializers import (
     BlogPostCreateSerializer,
 )
 
-SUCCESS = "success"
-ERROR = "error"
-DELETE_SUCCESS = "deleted"
-UPDATE_SUCCESS = "updated"
-CREATE_SUCCESS = "created"
+SUCCESS = "SUCCESS"
+ERROR = "ERROR"
+DELETE_SUCCESS = "DELETED"
+UPDATE_SUCCESS = "UPDATED"
+CREATE_SUCCESS = "CREATED"
 
 
 @api_view(["GET"])
