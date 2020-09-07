@@ -18,6 +18,7 @@ ERROR = "ERROR"
 DELETE_SUCCESS = "DELETED"
 UPDATE_SUCCESS = "UPDATED"
 CREATE_SUCCESS = "CREATED"
+PERMISSION_DENIED = "PERMISSION_DENIED"
 
 
 @api_view(["GET"])
@@ -82,7 +83,7 @@ def api_delete_blog_view(request, slug):
     user = request.user
     if blog_post.author != user:
         return Response(
-            {'response': "You don't have permission to delete that."},
+            {'response': PERMISSION_DENIED},
             status=status.HTTP_401_UNAUTHORIZED,
         )
 
@@ -112,7 +113,7 @@ def api_create_blog_view(request):
             data['title'] = blog_post.title
             data['body'] = blog_post.body
             data['slug'] = blog_post.slug
-            data['date_updated'] = blog_post.date_updated
+            data['date_updated'] = blog_post.timestamp
             image_url = str(request.build_absolute_uri(blog_post.image.url))
             if "?" in image_url:
                 image_url = image_url[:image_url.rfind("?")]

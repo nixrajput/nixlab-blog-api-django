@@ -81,9 +81,11 @@ class BlogPostUpdateSerializer(ModelSerializer):
 
 
 class BlogPostCreateSerializer(ModelSerializer):
+    timestamp = SerializerMethodField()
+
     class Meta:
         model = BlogPost
-        fields = ["title", "body", "image", "author", "date_updated"]
+        fields = ["title", "body", "image", "author", "timestamp"]
 
     def save(self):
 
@@ -136,3 +138,8 @@ class BlogPostCreateSerializer(ModelSerializer):
             raise ValidationError({
                 "response": "You must have title, body and image."
             })
+
+    def get_timestamp(self, obj):
+        date = obj.date_published
+        format_date = date.strftime("%d %b, %Y")
+        return format_date
