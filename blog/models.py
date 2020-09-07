@@ -40,14 +40,6 @@ class BlogPost(models.Model):
         blank=True,
         verbose_name=_("Image")
     )
-    date_published = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name="Date Published"
-    )
-    date_updated = models.DateTimeField(
-        auto_now=True,
-        verbose_name="Date Updated"
-    )
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
         on_delete=models.CASCADE,
@@ -58,6 +50,19 @@ class BlogPost(models.Model):
         blank=True,
         unique=True,
         verbose_name=_("Slug")
+    )
+    date_published = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Date Published")
+    )
+    date_updated = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_("Date Updated")
+    )
+    timestamp = models.DateTimeField(
+        null=True,
+        blank=True,
+        verbose_name=_("Timestamp")
     )
 
     class Meta:

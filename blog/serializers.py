@@ -14,7 +14,6 @@ IMAGE_SIZE_MAX_BYTES = 1024 * 1024 * 2
 class BlogPostSerializer(ModelSerializer):
     author = SerializerMethodField()
     image = SerializerMethodField()
-    timestamp = SerializerMethodField()
     author_id = SerializerMethodField()
 
     class Meta:
@@ -37,16 +36,16 @@ class BlogPostSerializer(ModelSerializer):
             new_url = image.url[:image.url.rfind("?")]
         return new_url
 
-    def get_timestamp(self, obj):
-        date = obj.date_published
-        format_date = date.strftime("%d %b, %Y")
-        return format_date
+    # def get_timestamp(self, obj):
+    #     date = obj.date_published
+    #     format_date = date.strftime("%d %b, %Y")
+    #     return format_date
 
 
 class BlogPostUpdateSerializer(ModelSerializer):
     class Meta:
         model = BlogPost
-        fields = ["title", "body", "image"]
+        fields = ["title", "body", "image", "timestamp"]
 
     def validate(self, blog_post):
         try:
@@ -81,7 +80,6 @@ class BlogPostUpdateSerializer(ModelSerializer):
 
 
 class BlogPostCreateSerializer(ModelSerializer):
-    timestamp = SerializerMethodField()
 
     class Meta:
         model = BlogPost
@@ -93,22 +91,14 @@ class BlogPostCreateSerializer(ModelSerializer):
             title = self.validated_data['title']
             body = self.validated_data['body']
             image = self.validated_data['image']
-
-            # if len(title) < MIN_TITLE_LENGTH:
-            #     raise ValidationError({
-            #         "response": "Enter a title longer than " + str(MIN_TITLE_LENGTH) + " characters",
-            #     })
-            #
-            # if len(body) < MIN_BODY_LENGTH:
-            #     raise ValidationError({
-            #         "response": "Enter a body longer than " + str(MIN_BODY_LENGTH) + " characters",
-            #     })
+            timestamp = self.validated_data['timestamp']
 
             blog_post = BlogPost(
                 author=self.validated_data['author'],
                 title=title,
                 body=body,
                 image=image,
+                timestamp=timestamp,
             )
 
             url = os.path.join(settings.TEMP, str(image))
@@ -138,8 +128,3 @@ class BlogPostCreateSerializer(ModelSerializer):
             raise ValidationError({
                 "response": "You must have title, body and image."
             })
-
-    def get_timestamp(self, obj):
-        date = obj.date_published
-        format_date = date.strftime("%d %b, %Y")
-        return format_date
