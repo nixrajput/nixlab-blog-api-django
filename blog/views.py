@@ -81,14 +81,18 @@ def api_delete_blog_view(request, slug):
 
     user = request.user
     if blog_post.author != user:
-        return Response({'response': "You don't have permission to delete that."})
+        return Response(
+            {'response': "You don't have permission to delete that."},
+            status=status.HTTP_401_UNAUTHORIZED,
+        )
 
     if request.method == 'DELETE':
         operation = blog_post.delete()
         data = {}
         if operation:
             data['response'] = DELETE_SUCCESS
-        return Response(data=data, status=status.HTTP_200_OK)
+            return Response(data=data, status=status.HTTP_200_OK)
+        return Response({"response": "DELETION_FAILED"}, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])
