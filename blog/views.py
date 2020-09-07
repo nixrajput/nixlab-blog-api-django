@@ -113,12 +113,13 @@ def api_create_blog_view(request):
             data['title'] = blog_post.title
             data['body'] = blog_post.body
             data['slug'] = blog_post.slug
-            data['date_updated'] = blog_post.timestamp
+            data['timestamp'] = blog_post.timestamp
             image_url = str(request.build_absolute_uri(blog_post.image.url))
             if "?" in image_url:
                 image_url = image_url[:image_url.rfind("?")]
             data['image'] = image_url
-            data['username'] = blog_post.author.username
+            data['author'] = blog_post.author.username
+            data['author_id'] = blog_post.author.id
             return Response(data=data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
