@@ -83,6 +83,12 @@ class Account(AbstractBaseUser):
         auto_now_add=True,
         verbose_name=_("Date Joined"),
     )
+    timestamp = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name=_("Timestamp")
+    )
     last_login = models.DateTimeField(
         auto_now=True,
         verbose_name=_("Last Login"),
@@ -168,6 +174,12 @@ class ProfilePicture(models.Model):
     uploaded_at = models.DateTimeField(
         auto_now=True,
         verbose_name=_('Upload Time'),
+    )
+    timestamp = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name=_("Timestamp")
     )
 
     class Meta:

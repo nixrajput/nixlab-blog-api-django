@@ -126,5 +126,5 @@ class BlogPostCreateSerializer(ModelSerializer):
             return blog_post
         except KeyError:
             raise ValidationError({
-                "response": "You must have title, body and image."
+                "response": "You must have all the fields not null."
             })

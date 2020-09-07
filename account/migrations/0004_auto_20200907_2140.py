@@ -6,12 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('blog', '0002_auto_20200907_1124'),
+        ('account', '0003_profilepicture'),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='blogpost',
+            model_name='account',
+            name='timestamp',
+            field=models.CharField(blank=True, max_length=100, null=True, verbose_name='Timestamp'),
+        ),
+        migrations.AddField(
+            model_name='profilepicture',
             name='timestamp',
             field=models.CharField(blank=True, max_length=100, null=True, verbose_name='Timestamp'),
         ),

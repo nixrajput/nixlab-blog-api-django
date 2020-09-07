@@ -59,7 +59,8 @@ class BlogPost(models.Model):
         auto_now=True,
         verbose_name=_("Date Updated")
     )
-    timestamp = models.DateTimeField(
+    timestamp = models.CharField(
+        max_length=100,
         null=True,
         blank=True,
         verbose_name=_("Timestamp")
