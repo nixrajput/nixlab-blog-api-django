@@ -17,6 +17,16 @@ from account.serializers import (
     AccountDetailSerializer,
 )
 
+DOES_NOT_EXIST = "DOES_NOT_EXIST"
+EMAIL_EXISTS = "EMAIL_EXISTS"
+USERNAME_EXISTS = "USERNAME_EXISTS"
+INVALID_EMAIL = "INVALID_EMAIL"
+INVALID_USERNAME = "INVALID_USERNAME"
+SUCCESS_TEXT = "SUCCESSFULLY_AUTHENTICATED"
+CREATION_TEXT = "SUCCESSFULLY_CREATED"
+INVALID_PASSWORD = "INVALID_PASSWORD"
+UPDATE_TEXT = "SUCCESSFULLY_UPDATED"
+
 
 @api_view(["POST"])
 @permission_classes([])
@@ -27,20 +37,20 @@ def registration_view(request):
         email = request.data.get('email', '0')
         if validate_email(email) is not None:
             data['response'] = "Error"
-            data['error_message'] = "This email is already in use."
+            data['error_message'] = EMAIL_EXISTS
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         username = request.data.get('username', '0')
         if validate_username(username) is not None:
             data['response'] = "Error"
-            data['error_message'] = "This username is already in use."
+            data['error_message'] = USERNAME_EXISTS
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = RegistrationSerializer(data=request.data)
 
         if serializer.is_valid():
             account = serializer.save()
-            data['response'] = "Successfully registered a new user."
+            data['response'] = CREATION_TEXT
             data['id'] = account.id
             data['email'] = account.email
             data['username'] = account.username
@@ -67,12 +77,12 @@ class ObtainAuthTokenView(APIView):
 
         if validate_username(username) is None:
             context['response'] = "Error"
-            context['error_message'] = "Username is incorrect."
+            context['error_message'] = INVALID_USERNAME
             return Response(context, status=status.HTTP_404_NOT_FOUND)
 
         if validate_password(username, password) is False:
             context['response'] = "Error"
-            context['error_message'] = "Password is incorrect."
+            context['error_message'] = INVALID_PASSWORD
             return Response(context, status=status.HTTP_404_NOT_FOUND)
 
         if serializer.is_valid():
@@ -82,7 +92,7 @@ class ObtainAuthTokenView(APIView):
                 token = Token.objects.get(user=account)
             except Token.DoesNotExist:
                 token = Token.objects.create(user=account)
-            context['response'] = 'Successfully authenticated!'
+            context['response'] = SUCCESS_TEXT
             context['id'] = account.id
             context['username'] = serializer.data['username']
             context['token'] = token.key
@@ -97,7 +107,7 @@ def detail_user_view(request):
     try:
         user = Account.objects.get(id=request.user.id)
     except Account.DoesNotExist:
-        return Response({'response': 'User not found.'},
+        return Response({'response': DOES_NOT_EXIST},
                         status=status.HTTP_404_NOT_FOUND)
 
     serializer = AccountDetailSerializer(user)
@@ -127,7 +137,7 @@ def update_account_view(request):
 
         if serializer.is_valid():
             serializer.save()
-            data['response'] = 'Account update success'
+            data['response'] = UPDATE_TEXT
             return Response(data=data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -143,7 +153,7 @@ def does_account_exist_view(request):
             account = Account.objects.get(email=email)
             data['response'] = email
         except Account.DoesNotExist:
-            data['response'] = "Account does not exist"
+            data['response'] = DOES_NOT_EXIST
         return Response(data)
 
 
@@ -158,7 +168,7 @@ def does_account_exist_view(request):
             account = Account.objects.get(email=email)
             data['response'] = email
         except Account.DoesNotExist:
-            data['response'] = "Account does not exist"
+            data['response'] = DOES_NOT_EXIST
         return Response(data)
 
 
@@ -230,7 +240,7 @@ def validate_password(username, password):
     try:
         account = Account.objects.get(username=username)
     except Account.DoesNotExist:
-        raise ValueError("Account does not exist.")
+        raise ValueError(DOES_NOT_EXIST)
 
     if account.check_password(password):
         return True
