@@ -50,19 +50,7 @@ class BlogPostUpdateSerializer(ModelSerializer):
 
     def validate(self, blog_post):
         try:
-            title = blog_post['title']
-            body = blog_post['body']
             image = blog_post['image']
-
-            # if len(title) < MIN_TITLE_LENGTH:
-            #     raise ValidationError({
-            #         "response": "Enter a title longer than " + str(MIN_TITLE_LENGTH) + " characters",
-            #     })
-            #
-            # if len(body) < MIN_BODY_LENGTH:
-            #     raise ValidationError({
-            #         "response": "Enter a body longer than " + str(MIN_BODY_LENGTH) + " characters",
-            #     })
 
             url = os.path.join(settings.TEMP, str(image))
             storage = FileSystemStorage(location=url)
@@ -85,8 +73,10 @@ class BlogPostUpdateSerializer(ModelSerializer):
                 })
 
             os.remove(url)
-        except KeyError:
-            pass
+        except (KeyError, ValueError):
+            raise ValidationError({
+                "response": "An error occurred."
+            })
         return blog_post
 
 

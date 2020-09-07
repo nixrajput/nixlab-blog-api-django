@@ -14,6 +14,7 @@ from account.serializers import (
     AccountPropertiesSerializer,
     ChangePasswordSerializer,
     LoginSerializer,
+    AccountDetailSerializer,
 )
 
 
@@ -90,6 +91,23 @@ class ObtainAuthTokenView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(["GET"])
+@permission_classes((IsAuthenticated,))
+def detail_user_view(request):
+    try:
+        user = Account.objects.get(id=request.user.id)
+    except Account.DoesNotExist:
+        return Response({'response': 'User not found.'},
+                        status=status.HTTP_404_NOT_FOUND)
+
+    serializer = AccountDetailSerializer(user)
+
+    if request.method == "GET":
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    return Response({'response': serializer.errors, },
+                    status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(["GET", "PUT"])
 @permission_classes((IsAuthenticated,))
 def update_account_view(request):
@@ -133,7 +151,6 @@ def does_account_exist_view(request):
 @permission_classes([])
 @authentication_classes([])
 def does_account_exist_view(request):
-
     if request.method == 'GET':
         email = request.GET['email'].lower()
         data = {}
@@ -181,7 +198,6 @@ class ChangePasswordView(UpdateAPIView):
 @api_view(['GET', ])
 @permission_classes((IsAuthenticated,))
 def account_properties_view(request):
-
     try:
         account = request.user
     except Account.DoesNotExist:

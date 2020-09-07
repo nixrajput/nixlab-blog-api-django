@@ -1,3 +1,4 @@
+import os
 import uuid
 
 from django.conf import settings
@@ -39,15 +40,73 @@ class MyAccountManager(BaseUserManager):
 
 
 class Account(AbstractBaseUser):
-    id = models.UUIDField(default=uuid.uuid4, primary_key=True, editable=False, auto_created=True)
-    email = models.EmailField(verbose_name="email", max_length=60, unique=True)
-    username = models.CharField(max_length=30, unique=True)
-    date_joined = models.DateTimeField(verbose_name='date joined', auto_now_add=True)
-    last_login = models.DateTimeField(verbose_name='last login', auto_now=True)
-    is_admin = models.BooleanField(default=False)
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
+    id = models.UUIDField(
+        default=uuid.uuid4,
+        primary_key=True,
+        editable=False,
+        auto_created=True,
+        verbose_name=_("ID"),
+    )
+    first_name = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name=_("First Name"),
+    )
+    last_name = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        verbose_name=_("Last Name"),
+    )
+    email = models.EmailField(
+        max_length=60,
+        unique=True,
+        verbose_name=_("Email"),
+    )
+    username = models.CharField(
+        max_length=30,
+        unique=True
+    )
+    dob = models.DateField(
+        blank=True,
+        null=True,
+        verbose_name=_("Date of Birth"),
+    )
+    phone = models.CharField(
+        max_length=15,
+        blank=True,
+        null=True,
+        verbose_name=_("Phone Number"),
+    )
+    date_joined = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Date Joined"),
+    )
+    last_login = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_("Last Login"),
+    )
+    is_valid = models.BooleanField(
+        default=False,
+        verbose_name=_("Is Verified"),
+    )
+    is_admin = models.BooleanField(
+        default=False,
+        verbose_name=_("Is Admin"),
+    )
+    is_active = models.BooleanField(
+        default=True,
+        verbose_name=_("Is Active"),
+    )
+    is_staff = models.BooleanField(
+        default=False,
+        verbose_name=_("Is Staff"),
+    )
+    is_superuser = models.BooleanField(
+        default=False,
+        verbose_name=_("Is Superuser"),
+    )
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['email']
@@ -61,7 +120,7 @@ class Account(AbstractBaseUser):
         verbose_name = _("User")
         verbose_name_plural = _("All Users")
 
-    # For checking permissions. to keep it simple all admin have ALL permissons
+    # For checking permissions. to keep it simple all admin have ALL permissions
     def has_perm(self, perm, obj=None):
         return self.is_admin
 
@@ -74,3 +133,46 @@ class Account(AbstractBaseUser):
 def create_auth_token(sender, instance, created=False, **kwargs):
     if created:
         Token.objects.create(user=instance)
+
+
+def image_path(instance, filename):
+    base_filename, file_extension = os.path.splitext(filename)
+
+    return 'profile_pictures/{user_id}/{random_string}{ext}'.format(
+        user_id=instance.user.id, random_string=instance.id, ext=file_extension
+    )
+
+
+class ProfilePicture(models.Model):
+    id = models.UUIDField(
+        default=uuid.uuid4,
+        primary_key=True,
+        editable=False,
+        auto_created=True,
+        verbose_name=_("ID"),
+    )
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        verbose_name=_("User")
+    )
+
+    image = models.ImageField(
+        upload_to=image_path,
+        null=True,
+        blank=True,
+        verbose_name=_('Picture'),
+    )
+
+    uploaded_at = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_('Upload Time'),
+    )
+
+    class Meta:
+        verbose_name = _("Profile Picture")
+        verbose_name_plural = _("Profile Pictures")
+
+    def __str__(self):
+        return self.image.name
