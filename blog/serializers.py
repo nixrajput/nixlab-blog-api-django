@@ -3,24 +3,26 @@ import os
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
 from rest_framework.exceptions import ValidationError
+from rest_framework.authtoken.models import Token
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from blog.models import BlogPost
 from blog.utils import is_image_aspect_ratio_valid, is_image_size_valid
 
 IMAGE_SIZE_MAX_BYTES = 1024 * 1024 * 2
+DOES_NOT_EXIST = "DOES_NOT_EXIST"
 
 
 class BlogPostSerializer(ModelSerializer):
     author = SerializerMethodField()
-    image = SerializerMethodField()
     author_id = SerializerMethodField()
+    token = SerializerMethodField()
 
     class Meta:
         model = BlogPost
         fields = [
-            "id", "title", "body", "image",
-            "author", "author_id", "slug", "timestamp"
+            "id", "title", "body", "image", "slug",
+            "author", "author_id", "token",  "timestamp"
         ]
 
     def get_author(self, obj):
@@ -29,17 +31,12 @@ class BlogPostSerializer(ModelSerializer):
     def get_author_id(self, obj):
         return obj.author.id
 
-    def get_image(self, obj):
-        image = obj.image
-        new_url = image.url
-        if "?" in new_url:
-            new_url = image.url[:image.url.rfind("?")]
-        return new_url
-
-    # def get_timestamp(self, obj):
-    #     date = obj.date_published
-    #     format_date = date.strftime("%d %b, %Y")
-    #     return format_date
+    def get_token(self, obj):
+        try:
+            token = Token.objects.get(user=obj.author)
+        except Token.DoesNotExist:
+            raise ValidationError(DOES_NOT_EXIST)
+        return token.key
 
 
 class BlogPostUpdateSerializer(ModelSerializer):

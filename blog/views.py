@@ -19,6 +19,7 @@ DELETE_SUCCESS = "DELETED"
 UPDATE_SUCCESS = "UPDATED"
 CREATE_SUCCESS = "CREATED"
 PERMISSION_DENIED = "PERMISSION_DENIED"
+DOES_NOT_EXIST = "DOES_NOT_EXIST"
 
 
 @api_view(["GET"])
@@ -62,12 +63,10 @@ def api_update_blog_view(request, slug):
             data['title'] = blog_post.title
             data['body'] = blog_post.body
             data['slug'] = blog_post.slug
-            data['date_updated'] = blog_post.date_updated
-            image_url = str(request.build_absolute_uri(blog_post.image.url))
-            if "?" in image_url:
-                image_url = image_url[:image_url.rfind("?")]
-            data['image'] = image_url
-            data['username'] = blog_post.author.username
+            data['image'] = blog_post.image.url
+            data['author'] = blog_post.author.username
+            data['author_id'] = blog_post.author.id
+            data['timestamp'] = blog_post.timestamp
             return Response(data=data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -113,13 +112,10 @@ def api_create_blog_view(request):
             data['title'] = blog_post.title
             data['body'] = blog_post.body
             data['slug'] = blog_post.slug
-            data['timestamp'] = blog_post.timestamp
-            image_url = str(request.build_absolute_uri(blog_post.image.url))
-            if "?" in image_url:
-                image_url = image_url[:image_url.rfind("?")]
-            data['image'] = image_url
+            data['image'] = blog_post.image.url
             data['author'] = blog_post.author.username
             data['author_id'] = blog_post.author.id
+            data['timestamp'] = blog_post.timestamp
             return Response(data=data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

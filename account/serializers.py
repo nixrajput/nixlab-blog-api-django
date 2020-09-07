@@ -39,33 +39,27 @@ class LoginSerializer(Serializer):
 
 
 class ProfilePictureSerializer(ModelSerializer):
-    image = SerializerMethodField()
 
     class Meta:
         model = ProfilePicture
-        fields = "__all__"
-
-    def get_image(self, obj):
-        image = obj.image
-        new_url = image.url
-        if "?" in new_url:
-            new_url = image.url[:image.url.rfind("?")]
-        return new_url
+        fields = ['image']
 
 
 class AccountDetailSerializer(ModelSerializer):
-    image = SerializerMethodField()
+    profile_picture = SerializerMethodField()
 
     class Meta:
         model = Account
         fields = [
-            'id', 'first_name', 'last_name', 'image',
-            'username', 'email', 'dob', 'phone',
+            'id', 'first_name', 'last_name', 'phone',
+            'username', 'email', 'dob', 'profile_picture',
         ]
 
-    def get_image(self, obj):
-        print(obj.id)
-        image = ProfilePicture.objects.filter(user=obj.id).order_by('-uploaded_at')[0]
+    def get_profile_picture(self, obj):
+        try:
+            image = ProfilePicture.objects.filter(user=obj.id).order_by('-uploaded_at')[0]
+        except (ProfilePicture.DoesNotExist, IndexError):
+            image = ""
 
         serializer = ProfilePictureSerializer(image)
 
