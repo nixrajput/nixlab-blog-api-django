@@ -15,6 +15,7 @@ from account.serializers import (
     ChangePasswordSerializer,
     LoginSerializer,
     AccountDetailSerializer,
+    ProfilePictureSerializer,
 )
 
 DOES_NOT_EXIST = "DOES_NOT_EXIST"
@@ -104,9 +105,9 @@ class ObtainAuthTokenView(APIView):
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
-def detail_user_view(request):
+def detail_user_view(request, user_id):
     try:
-        user = Account.objects.get(id=request.user.id)
+        user = Account.objects.get(id=user_id)
     except Account.DoesNotExist:
         return Response({'response': DOES_NOT_EXIST},
                         status=status.HTTP_404_NOT_FOUND)
