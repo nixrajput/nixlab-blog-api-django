@@ -1,3 +1,7 @@
+import os
+
+from django.conf import settings
+from django.core.files.storage import FileSystemStorage
 from rest_framework.serializers import (
     ModelSerializer,
     CharField,
@@ -7,6 +11,10 @@ from rest_framework.serializers import (
 )
 
 from account.models import Account, ProfilePicture
+from blog.utils import is_image_aspect_ratio_valid, is_image_size_valid
+
+IMAGE_SIZE_MAX_BYTES = 1024 * 1024 * 2
+DOES_NOT_EXIST = "DOES_NOT_EXIST"
 
 
 class RegistrationSerializer(ModelSerializer):

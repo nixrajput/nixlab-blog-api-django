@@ -1,7 +1,8 @@
 import os
-from cv2 import imread
 import random
 import string
+
+from cv2 import imread
 
 
 def is_image_aspect_ratio_valid(img_url):

@@ -7,7 +7,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 load_dotenv(verbose=True, dotenv_path=os.path.join(BASE_DIR, '.env'))
 
-
 SECRET_KEY = '%%z8+6phy!#ee^v14^90!o6==lklc8ghpim4%m*%piznc-t@j&'
 
 DEBUG = False
@@ -107,7 +106,6 @@ USE_L10N = True
 
 USE_TZ = True
 
-
 db_from_env = dj_database_url.config(conn_max_age=600)
 DATABASES['default'].update(db_from_env)
 
@@ -140,7 +138,6 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
-
 
 LOGGING = {
     'version': 1,

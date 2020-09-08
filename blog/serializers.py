@@ -2,8 +2,8 @@ import os
 
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
-from rest_framework.exceptions import ValidationError
 from rest_framework.authtoken.models import Token
+from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from blog.models import BlogPost
@@ -22,7 +22,7 @@ class BlogPostSerializer(ModelSerializer):
         model = BlogPost
         fields = [
             "id", "title", "body", "image", "slug",
-            "author", "author_id", "token",  "timestamp"
+            "author", "author_id", "token", "timestamp"
         ]
 
     def get_author(self, obj):
@@ -77,7 +77,6 @@ class BlogPostUpdateSerializer(ModelSerializer):
 
 
 class BlogPostCreateSerializer(ModelSerializer):
-
     class Meta:
         model = BlogPost
         fields = ["title", "body", "image", "author", "timestamp"]

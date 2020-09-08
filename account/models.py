@@ -6,8 +6,8 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from rest_framework.authtoken.models import Token
 from django.utils.translation import ugettext_lazy as _
+from rest_framework.authtoken.models import Token
 
 
 class MyAccountManager(BaseUserManager):
@@ -145,7 +145,7 @@ def image_path(instance, filename):
     base_filename, file_extension = os.path.splitext(filename)
 
     return 'profile_pictures/{user_id}/{random_string}{ext}'.format(
-        user_id=instance.user.id, random_string=instance.id, ext=file_extension
+        user_id=str(instance.user.id), random_string=instance.id, ext=file_extension
     )
 
 

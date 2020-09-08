@@ -15,7 +15,7 @@ from account.serializers import (
     ChangePasswordSerializer,
     LoginSerializer,
     AccountDetailSerializer,
-    ProfilePictureSerializer,
+    ProfilePictureUploadSerializer
 )
 
 DOES_NOT_EXIST = "DOES_NOT_EXIST"
@@ -128,7 +128,7 @@ def upload_profile_picture(request):
 
         data = request.data
         data['user'] = request.user.id
-        serializer = ProfilePictureSerializer(data=data)
+        serializer = ProfilePictureUploadSerializer(data=data)
 
         data = {}
         if serializer.is_valid():
