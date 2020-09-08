@@ -39,10 +39,56 @@ class LoginSerializer(Serializer):
 
 
 class ProfilePictureSerializer(ModelSerializer):
-
     class Meta:
         model = ProfilePicture
         fields = ['image']
+
+
+class ProfilePictureUploadSerializer(ModelSerializer):
+    class Meta:
+        model = ProfilePicture
+        fields = ['user', 'image', 'timestamp']
+
+    def save(self):
+
+        try:
+            image = self.validated_data['image']
+            timestamp = self.validated_data['timestamp']
+
+            profile_pic = ProfilePicture(
+                user=self.validated_data['user'],
+                image=image,
+                timestamp=timestamp,
+            )
+
+            url = os.path.join(settings.TEMP, str(image))
+            storage = FileSystemStorage(location=url)
+
+            with storage.open('', 'wb+') as destination:
+                for chunk in image.chunks():
+                    destination.write(chunk)
+                destination.close()
+
+            if not is_image_size_valid(url, IMAGE_SIZE_MAX_BYTES):
+                os.remove(url)
+                raise ValidationError({
+                    "response": "The image is too large. Image must be less than 2 MB."
+                })
+
+            if not is_image_aspect_ratio_valid(url):
+                os.remove(url)
+                raise ValidationError({
+                    "response": "Image must be in square pixels."
+                })
+
+            os.remove(url)
+            profile_pic.save()
+            return profile_pic
+
+        except KeyError:
+            raise ValidationError({
+                "response": "You must have all the fields not null."
+            })
 
 
 class AccountDetailSerializer(ModelSerializer):

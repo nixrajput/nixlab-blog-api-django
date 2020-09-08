@@ -121,6 +121,7 @@ class BlogPostCreateSerializer(ModelSerializer):
             os.remove(url)
             blog_post.save()
             return blog_post
+
         except KeyError:
             raise ValidationError({
                 "response": "You must have all the fields not null."

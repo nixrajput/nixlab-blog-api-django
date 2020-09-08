@@ -8,6 +8,7 @@ from account.views import (
     account_properties_view,
     does_account_exist_view,
     detail_user_view,
+    upload_profile_picture,
 )
 
 app_name = "account"
@@ -20,4 +21,5 @@ urlpatterns = [
     path('properties/', account_properties_view, name="properties"),
     path('properties/update/', update_account_view, name='update'),
     path('details/<user_id>/', detail_user_view, name='details'),
+    path('upload_profile_picture/', upload_profile_picture, name='upload_profile_picture'),
 ]

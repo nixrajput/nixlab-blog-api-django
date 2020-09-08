@@ -27,6 +27,7 @@ SUCCESS_TEXT = "SUCCESSFULLY_AUTHENTICATED"
 CREATION_TEXT = "SUCCESSFULLY_CREATED"
 INVALID_PASSWORD = "INVALID_PASSWORD"
 UPDATE_TEXT = "SUCCESSFULLY_UPDATED"
+UPLOAD_SUCCESS = "SUCCESSFULLY_UPLOADED"
 
 
 @api_view(["POST"])
@@ -118,6 +119,27 @@ def detail_user_view(request, user_id):
         return Response(serializer.data, status=status.HTTP_200_OK)
     return Response({'response': serializer.errors, },
                     status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def upload_profile_picture(request):
+    if request.method == "POST":
+
+        data = request.data
+        data['user'] = request.user.id
+        serializer = ProfilePictureSerializer(data=data)
+
+        data = {}
+        if serializer.is_valid():
+            profile_pic = serializer.save()
+            data['response'] = UPLOAD_SUCCESS
+            data['id'] = profile_pic.id
+            data['image'] = profile_pic.image.url
+            data['user'] = profile_pic.user.username
+            data['timestamp'] = profile_pic.timestamp
+            return Response(data=data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET", "PUT"])
