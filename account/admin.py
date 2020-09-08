@@ -11,7 +11,6 @@ class ProfilePictureInline(admin.TabularInline):
 
 
 class ProfilePictureAdmin(admin.ModelAdmin):
-    list_display = ('image', 'user', 'uploaded_at')
     list_filter = ('user', 'uploaded_at')
     ordering = ("-uploaded_at",)
 
