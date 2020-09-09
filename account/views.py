@@ -151,7 +151,7 @@ def update_account_view(request):
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "PUT":
-        serializer = AccountPropertiesSerializer(account, data=request.data)
+        serializer = AccountPropertiesSerializer(account, data=request.data, partial=True)
         data = {}
 
         if serializer.is_valid():
