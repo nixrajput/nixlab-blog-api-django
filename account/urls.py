@@ -19,7 +19,7 @@ urlpatterns = [
     path('check_if_account_exists/', does_account_exist_view, name="check_if_account_exists"),
     path('change_password/', ChangePasswordView.as_view(), name="change_password"),
     path('properties/', account_properties_view, name="properties"),
-    path('properties/update/', update_account_view, name='update'),
+    path('update/', update_account_view, name='update'),
     path('details/<user_id>/', detail_user_view, name='details'),
     path('upload_profile_picture/', upload_profile_picture, name='upload_profile_picture'),
 ]

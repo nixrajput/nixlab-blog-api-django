@@ -142,16 +142,11 @@ def upload_profile_picture(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(["GET", "PUT"])
+@api_view(["PUT"])
 @permission_classes((IsAuthenticated,))
 def update_account_view(request):
     try:
         account = request.user
-    except Account.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    try:
-        user = Account.objects.get(username=request.user.username)
     except Account.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 
@@ -162,7 +157,12 @@ def update_account_view(request):
         if serializer.is_valid():
             serializer.save()
             data['response'] = UPDATE_TEXT
-            return Response(data=data)
+            data['username'] = account.username
+            data['email'] = account.email
+            data['phone'] = account.phone
+            data['dob'] = account.dob
+            data['timestamp'] = account.timestamp
+            return Response(data=data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 

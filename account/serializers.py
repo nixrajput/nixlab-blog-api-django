@@ -123,7 +123,7 @@ class AccountDetailSerializer(ModelSerializer):
 class AccountPropertiesSerializer(ModelSerializer):
     class Meta:
         model = Account
-        fields = ['id', 'email', 'username', ]
+        fields = ["first_name", "last_name", "phone", "dob", "timestamp"]
 
 
 class ChangePasswordSerializer(Serializer):
