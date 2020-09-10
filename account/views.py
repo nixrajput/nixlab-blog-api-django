@@ -101,7 +101,6 @@ class ObtainAuthTokenView(APIView):
 
             context['response'] = SUCCESS_TEXT
             context['id'] = account.id
-            context['username'] = serializer.data['username']
             context['token'] = token.key
             context['expires_in'] = expires_in(token)
             return Response(context, status=status.HTTP_200_OK)
