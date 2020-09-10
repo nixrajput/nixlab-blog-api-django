@@ -136,9 +136,7 @@ class AccountPropertiesSerializer(ModelSerializer):
                 raise ValidationError("You are too young. Your age should be more than 6 years.")
 
         except (KeyError, ValueError):
-            raise ValidationError({
-                "response": "An error occurred."
-            })
+            raise ValidationError("An error occurred.")
         return account
 
 
