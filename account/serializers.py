@@ -1,4 +1,5 @@
 import os
+import datetime
 
 from django.conf import settings
 from django.core.files.storage import FileSystemStorage
@@ -124,6 +125,21 @@ class AccountPropertiesSerializer(ModelSerializer):
     class Meta:
         model = Account
         fields = ["first_name", "last_name", "phone", "dob", "timestamp"]
+
+    def validate(self, account):
+        try:
+            dob = account['dob']
+
+            diff = abs(datetime.now.today() - dob)
+
+            if (diff.days / 365) < 6:
+                raise ValidationError("You are too young. Your age should be more than 6 years.")
+
+        except (KeyError, ValueError):
+            raise ValidationError({
+                "response": "An error occurred."
+            })
+        return account
 
 
 class ChangePasswordSerializer(Serializer):
