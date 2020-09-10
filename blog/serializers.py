@@ -65,7 +65,7 @@ class BlogPostUpdateSerializer(ModelSerializer):
             if not is_image_aspect_ratio_valid(url):
                 os.remove(url)
                 raise ValidationError({
-                    "response": "Image must be in square pixels."
+                    "detail": "Image must be in square pixels."
                 })
 
             os.remove(url)
