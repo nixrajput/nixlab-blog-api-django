@@ -130,10 +130,12 @@ class AccountPropertiesSerializer(ModelSerializer):
         try:
             dob = account['dob']
 
-            diff = abs(datetime.now.today() - dob)
+            diff = abs(datetime.date.today() - dob)
 
             if (diff.days / 365) < 6:
-                raise ValidationError("You are too young. Your age should be more than 6 years.")
+                raise ValidationError({
+                    'detail': "You are too young. Your age should be more than 6 years."
+                })
 
         except (KeyError, ValueError):
             raise ValidationError("An error occurred.")
