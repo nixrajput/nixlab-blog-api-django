@@ -17,6 +17,7 @@ from account.serializers import (
     AccountDetailSerializer,
     ProfilePictureUploadSerializer
 )
+from account.utils import token_expire_handler, is_token_expired, expires_in
 
 DOES_NOT_EXIST = "DOES_NOT_EXIST"
 EMAIL_EXISTS = "EMAIL_EXISTS"
@@ -92,13 +93,17 @@ class ObtainAuthTokenView(APIView):
             account = authenticate(username=username, password=password)
 
             try:
-                token = Token.objects.get(user=account)
+                token, _ = Token.objects.get_or_create(user=account)
             except Token.DoesNotExist:
                 token = Token.objects.create(user=account)
+
+            is_expired, token = token_expire_handler(token)
+
             context['response'] = SUCCESS_TEXT
             context['id'] = account.id
             context['username'] = serializer.data['username']
             context['token'] = token.key
+            context['expires_in'] = expires_in(token)
             return Response(context, status=status.HTTP_200_OK)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

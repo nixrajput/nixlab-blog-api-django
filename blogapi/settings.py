@@ -30,12 +30,14 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.TokenAuthentication',
+        'account.utils.ExpiringTokenAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
 }
+
+TOKEN_EXPIRED_AFTER_SECONDS = 120  # 86400
 
 AUTH_USER_MODEL = 'account.Account'
 
