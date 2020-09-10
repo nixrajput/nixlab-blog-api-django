@@ -121,12 +121,27 @@ def api_create_blog_view(request):
 
 
 class ApiBlogListView(ListAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
     queryset = BlogPost.objects.all()
     serializer_class = BlogPostSerializer
-    authentication_classes = (TokenAuthentication,)
-    permission_classes = (IsAuthenticated,)
     filter_backends = (SearchFilter, OrderingFilter)
     search_fields = ('title', 'body', 'author__username')
+
+
+class ApiUserBlogListView(ListAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    serializer_class = BlogPostSerializer
+    filter_backends = (SearchFilter, OrderingFilter)
+    search_fields = ('title', 'body', 'author__username')
+
+    def get_queryset(self, *args, **kwargs):
+        queryset = BlogPost.objects.filter(author=self.request.user)
+
+        return queryset
 
 
 @api_view(['GET', ])
