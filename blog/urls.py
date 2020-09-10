@@ -14,7 +14,7 @@ app_name = "blog"
 
 urlpatterns = [
     path('', ApiBlogListView.as_view(), name="list"),
-    path('list/', ApiUserBlogListView.as_view(), name='post_list'),
+    path('list/<uid>/', ApiUserBlogListView.as_view(), name='post_list'),
     path('create/', api_create_blog_view, name="create"),
     path('<slug>/', api_detail_blog_view, name="detail"),
     path('<slug>/update/', api_update_blog_view, name="update"),

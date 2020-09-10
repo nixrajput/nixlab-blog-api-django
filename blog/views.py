@@ -137,9 +137,11 @@ class ApiUserBlogListView(ListAPIView):
     serializer_class = BlogPostSerializer
     filter_backends = (SearchFilter, OrderingFilter)
     search_fields = ('title', 'body', 'author__username')
+    lookup_url_kwarg = "uid"
 
     def get_queryset(self, *args, **kwargs):
-        queryset = BlogPost.objects.filter(author=self.request.user)
+        uid = self.kwargs.get(self.lookup_url_kwarg)
+        queryset = BlogPost.objects.filter(author=uid)
 
         return queryset
 
