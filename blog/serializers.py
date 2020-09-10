@@ -8,6 +8,7 @@ from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from blog.models import BlogPost
 from blog.utils import is_image_aspect_ratio_valid, is_image_size_valid
+from account.utils import token_expire_handler, is_token_expired, expires_in
 
 IMAGE_SIZE_MAX_BYTES = 1024 * 1024 * 2
 DOES_NOT_EXIST = "DOES_NOT_EXIST"
@@ -32,10 +33,14 @@ class BlogPostSerializer(ModelSerializer):
         return obj.author.id
 
     def get_token(self, obj):
+
         try:
-            token = Token.objects.get(user=obj.author)
+            token, _ = Token.objects.get_or_create(user=obj.author)
         except Token.DoesNotExist:
             raise ValidationError(DOES_NOT_EXIST)
+
+        is_expired, token = token_expire_handler(token)
+
         return token.key
 
 
