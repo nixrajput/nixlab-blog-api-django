@@ -51,6 +51,16 @@ class BlogPost(models.Model):
         unique=True,
         verbose_name=_("Slug")
     )
+    likes = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name=_("blog_post_likes"),
+        blank=True,
+        verbose_name=_("Likes")
+    )
+    is_draft = models.BooleanField(
+        default=False,
+        verbose_name=_("Draft Status")
+    )
     date_published = models.DateTimeField(
         auto_now_add=True,
         verbose_name=_("Date Published")

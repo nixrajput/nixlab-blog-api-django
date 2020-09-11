@@ -79,15 +79,17 @@ class Account(AbstractBaseUser):
         null=True,
         verbose_name=_("Phone Number"),
     )
-    date_joined = models.DateTimeField(
-        auto_now_add=True,
-        verbose_name=_("Date Joined"),
-    )
-    timestamp = models.CharField(
-        max_length=100,
-        null=True,
+    followers = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name=_("account_followers"),
         blank=True,
-        verbose_name=_("Timestamp")
+        verbose_name=_("Followers"),
+    )
+    following = models.ManyToManyField(
+        settings.AUTH_USER_MODEL,
+        related_name=_("account_following"),
+        blank=True,
+        verbose_name=_("Following"),
     )
     last_login = models.DateTimeField(
         auto_now=True,
@@ -112,6 +114,16 @@ class Account(AbstractBaseUser):
     is_superuser = models.BooleanField(
         default=False,
         verbose_name=_("Is Superuser"),
+    )
+    date_joined = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Date Joined"),
+    )
+    timestamp = models.CharField(
+        max_length=100,
+        null=True,
+        blank=True,
+        verbose_name=_("Timestamp")
     )
 
     USERNAME_FIELD = 'username'

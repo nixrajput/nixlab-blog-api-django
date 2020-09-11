@@ -26,9 +26,11 @@ DOES_NOT_EXIST = "DOES_NOT_EXIST"
 @permission_classes((IsAuthenticated,))
 def api_detail_blog_view(request, slug):
     try:
-        blog_post = BlogPost.objects.get(slug=slug)
+        blog_post = BlogPost.objects.get(slug=slug, is_draft=False)
     except BlogPost.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"response": DOES_NOT_EXIST},
+                        status=status.HTTP_404_NOT_FOUND
+                        )
 
     serializer = BlogPostSerializer(blog_post)
 
@@ -42,9 +44,11 @@ def api_detail_blog_view(request, slug):
 @permission_classes((IsAuthenticated,))
 def api_update_blog_view(request, slug):
     try:
-        blog_post = BlogPost.objects.get(slug=slug)
+        blog_post = BlogPost.objects.get(slug=slug, is_draft=False)
     except BlogPost.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"response": DOES_NOT_EXIST},
+                        status=status.HTTP_404_NOT_FOUND
+                        )
 
     user = request.user
     if blog_post.author != user:
@@ -53,7 +57,11 @@ def api_update_blog_view(request, slug):
         })
 
     if request.method == "PUT":
-        serializer = BlogPostUpdateSerializer(blog_post, data=request.data, partial=True)
+        serializer = BlogPostUpdateSerializer(
+            blog_post,
+            data=request.data,
+            partial=True
+        )
         data = {}
 
         if serializer.is_valid():
@@ -75,9 +83,11 @@ def api_update_blog_view(request, slug):
 @permission_classes((IsAuthenticated,))
 def api_delete_blog_view(request, slug):
     try:
-        blog_post = BlogPost.objects.get(slug=slug)
+        blog_post = BlogPost.objects.get(slug=slug, is_draft=False)
     except BlogPost.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        return Response({"response": DOES_NOT_EXIST},
+                        status=status.HTTP_404_NOT_FOUND
+                        )
 
     user = request.user
     if blog_post.author != user:
@@ -92,7 +102,37 @@ def api_delete_blog_view(request, slug):
         if operation:
             data['response'] = DELETE_SUCCESS
             return Response(data=data, status=status.HTTP_200_OK)
-        return Response({"response": "DELETION_FAILED"}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"response": "DELETION_FAILED"},
+                        status=status.HTTP_400_BAD_REQUEST
+                        )
+
+
+@api_view(["GET"])
+@permission_classes((IsAuthenticated,))
+def api_like_toggle_view(request, slug):
+    try:
+        blog_post = BlogPost.objects.get(slug=slug, is_draft=False)
+    except BlogPost.DoesNotExist:
+        return Response({"response": DOES_NOT_EXIST},
+                        status=status.HTTP_404_NOT_FOUND
+                        )
+
+    if request.user.is_authenticated:
+        if request.user in blog_post.likes.all():
+            blog_post.likes.remove(request.user)
+            liked = False
+        else:
+            blog_post.likes.add(request.user)
+            liked = True
+
+        updated = True
+
+        data = {
+            "updated": updated,
+            "liked": liked
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
 
 
 @api_view(["POST"])
@@ -124,7 +164,7 @@ class ApiBlogListView(ListAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    queryset = BlogPost.objects.all()
+    queryset = BlogPost.objects.filter(is_draft=False)
     serializer_class = BlogPostSerializer
     filter_backends = (SearchFilter, OrderingFilter)
     search_fields = ('title', 'body', 'author__username')
@@ -141,7 +181,7 @@ class ApiUserBlogListView(ListAPIView):
 
     def get_queryset(self, *args, **kwargs):
         uid = self.kwargs.get(self.lookup_url_kwarg)
-        queryset = BlogPost.objects.filter(author=uid)
+        queryset = BlogPost.objects.filter(is_draft=False, author=uid)
 
         return queryset
 
@@ -150,7 +190,7 @@ class ApiUserBlogListView(ListAPIView):
 @permission_classes((IsAuthenticated,))
 def api_is_author_of_blogpost(request, slug):
     try:
-        blog_post = BlogPost.objects.get(slug=slug)
+        blog_post = BlogPost.objects.get(slug=slug, is_draft=False)
     except BlogPost.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 

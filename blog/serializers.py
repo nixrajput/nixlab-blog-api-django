@@ -18,11 +18,12 @@ class BlogPostSerializer(ModelSerializer):
     author = SerializerMethodField()
     author_id = SerializerMethodField()
     token = SerializerMethodField()
+    likes = SerializerMethodField()
 
     class Meta:
         model = BlogPost
         fields = [
-            "id", "title", "body", "image", "slug",
+            "id", "title", "body", "image", "slug", "likes",
             "author", "author_id", "token", "timestamp"
         ]
 
@@ -42,6 +43,9 @@ class BlogPostSerializer(ModelSerializer):
         is_expired, token = token_expire_handler(token)
 
         return token.key
+
+    def get_likes(self, obj):
+        return obj.likes.count()
 
 
 class BlogPostUpdateSerializer(ModelSerializer):
