@@ -106,8 +106,8 @@ class AccountDetailSerializer(ModelSerializer):
     class Meta:
         model = Account
         fields = [
-            'id', 'first_name', 'last_name', 'phone', "followers",
-            "following", 'username', 'email', 'dob', 'profile_picture',
+            'id', 'first_name', 'last_name', 'phone', 'username', 'email',
+            'dob', "followers", "following",  'profile_picture',
         ]
 
     def get_profile_picture(self, obj):

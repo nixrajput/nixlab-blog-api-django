@@ -9,6 +9,8 @@ from account.views import (
     does_account_exist_view,
     detail_user_view,
     upload_profile_picture,
+    api_follow_toggle_view,
+    api_check_if_following_view,
 )
 
 app_name = "account"
@@ -21,5 +23,7 @@ urlpatterns = [
     path('properties/', account_properties_view, name="properties"),
     path('update/', update_account_view, name='update'),
     path('details/<user_id>/', detail_user_view, name='details'),
+    path('follow/<user_id>/', api_follow_toggle_view, name='follow'),
+    path('is_following/<user_id>/', api_check_if_following_view, name='is_following'),
     path('upload_profile_picture/', upload_profile_picture, name='upload_profile_picture'),
 ]

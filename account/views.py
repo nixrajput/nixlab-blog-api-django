@@ -125,6 +125,65 @@ def detail_user_view(request, user_id):
                     status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(["GET"])
+@permission_classes((IsAuthenticated,))
+def api_follow_toggle_view(request, user_id):
+    try:
+        user = Account.objects.get(id=request.user.id)
+        following_user = Account.objects.get(id=user_id)
+    except Account.DoesNotExist:
+        return Response({'response': DOES_NOT_EXIST},
+                        status=status.HTTP_404_NOT_FOUND)
+
+    if request.user.is_authenticated:
+        if following_user in user.following.all() and \
+                request.user in following_user.followers.all():
+            user.following.remove(following_user)
+            following_user.followers.remove(request.user)
+            is_following = False
+        else:
+            user.following.add(following_user)
+            following_user.followers.add(request.user)
+            is_following = True
+
+        updated = True
+
+        data = {
+            "follower": user.username,
+            "following": following_user.username,
+            "updated": updated,
+            "is_following": is_following
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
+
+
+@api_view(["GET"])
+@permission_classes((IsAuthenticated,))
+def api_check_if_following_view(request, user_id):
+    try:
+        user = Account.objects.get(id=request.user.id)
+        following_user = Account.objects.get(id=user_id)
+    except Account.DoesNotExist:
+        return Response({'response': DOES_NOT_EXIST},
+                        status=status.HTTP_404_NOT_FOUND)
+
+    if request.user.is_authenticated:
+        if following_user in user.following.all() and \
+                request.user in following_user.followers.all():
+            is_following = True
+        else:
+            is_following = False
+
+        data = {
+            "follower": user.username,
+            "following": following_user.username,
+            "is_following": is_following
+        }
+
+        return Response(data, status=status.HTTP_200_OK)
+
+
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
 def upload_profile_picture(request):
@@ -179,7 +238,8 @@ def does_account_exist_view(request):
         data = {}
         try:
             account = Account.objects.get(email=email)
-            data['response'] = email
+            if account:
+                data['response'] = email
         except Account.DoesNotExist:
             data['response'] = DOES_NOT_EXIST
         return Response(data)
