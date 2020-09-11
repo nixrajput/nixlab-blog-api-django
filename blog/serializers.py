@@ -19,12 +19,13 @@ class BlogPostSerializer(ModelSerializer):
     author_id = SerializerMethodField()
     token = SerializerMethodField()
     like_count = SerializerMethodField()
+    is_liked = SerializerMethodField()
 
     class Meta:
         model = BlogPost
         fields = [
             "id", "title", "body", "image", "slug", "likes", "like_count",
-            "author", "author_id", "token", "timestamp"
+            "is_liked", "author", "author_id", "token", "timestamp"
         ]
 
     def get_author(self, obj):
@@ -46,6 +47,11 @@ class BlogPostSerializer(ModelSerializer):
 
     def get_like_count(self, obj):
         return obj.likes.count()
+
+    def get_is_liked(self, obj):
+        if self.context['request'].user in obj.likes.all():
+            return True
+        return False
 
 
 class BlogPostUpdateSerializer(ModelSerializer):
