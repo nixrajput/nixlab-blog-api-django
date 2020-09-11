@@ -18,12 +18,12 @@ class BlogPostSerializer(ModelSerializer):
     author = SerializerMethodField()
     author_id = SerializerMethodField()
     token = SerializerMethodField()
-    likes = SerializerMethodField()
+    like_count = SerializerMethodField()
 
     class Meta:
         model = BlogPost
         fields = [
-            "id", "title", "body", "image", "slug", "likes",
+            "id", "title", "body", "image", "slug", "likes", "like_count",
             "author", "author_id", "token", "timestamp"
         ]
 
@@ -44,7 +44,7 @@ class BlogPostSerializer(ModelSerializer):
 
         return token.key
 
-    def get_likes(self, obj):
+    def get_like_count(self, obj):
         return obj.likes.count()
 
 
