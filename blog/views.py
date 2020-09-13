@@ -164,10 +164,14 @@ class ApiBlogListView(ListAPIView):
     authentication_classes = [TokenAuthentication]
     permission_classes = [IsAuthenticated]
 
-    queryset = BlogPost.objects.filter(is_draft=False)
     serializer_class = BlogPostSerializer
     filter_backends = (SearchFilter, OrderingFilter)
     search_fields = ('title', 'body', 'author__username')
+
+    def get_queryset(self, *args, **kwargs):
+        queryset = BlogPost.objects.filter(is_draft=False).order_by('-date_published')
+
+        return queryset
 
 
 class ApiUserBlogListView(ListAPIView):
@@ -181,7 +185,7 @@ class ApiUserBlogListView(ListAPIView):
 
     def get_queryset(self, *args, **kwargs):
         uid = self.kwargs.get(self.lookup_url_kwarg)
-        queryset = BlogPost.objects.filter(is_draft=False, author=uid)
+        queryset = BlogPost.objects.filter(is_draft=False, author=uid).order_by('-date_published')
 
         return queryset
 
