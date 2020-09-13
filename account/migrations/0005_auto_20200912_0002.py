@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         ('account', '0004_auto_20200907_2140'),
     ]
@@ -14,11 +13,13 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='account',
             name='followers',
-            field=models.ManyToManyField(blank=True, related_name='account_followers', to=settings.AUTH_USER_MODEL, verbose_name='Followers'),
+            field=models.ManyToManyField(blank=True, related_name='account_followers', to=settings.AUTH_USER_MODEL,
+                                         verbose_name='Followers'),
         ),
         migrations.AddField(
             model_name='account',
             name='following',
-            field=models.ManyToManyField(blank=True, related_name='account_following', to=settings.AUTH_USER_MODEL, verbose_name='Following'),
+            field=models.ManyToManyField(blank=True, related_name='account_following', to=settings.AUTH_USER_MODEL,
+                                         verbose_name='Following'),
         ),
     ]

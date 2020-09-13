@@ -17,7 +17,7 @@ from account.serializers import (
     AccountDetailSerializer,
     ProfilePictureUploadSerializer
 )
-from account.utils import token_expire_handler, is_token_expired, expires_in
+from account.utils import token_expire_handler, expires_in
 
 DOES_NOT_EXIST = "DOES_NOT_EXIST"
 EMAIL_EXISTS = "EMAIL_EXISTS"

@@ -1,14 +1,9 @@
-import os
-
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
 from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
+from account.utils import token_expire_handler
 from blog.models import BlogPost
-from blog.utils import is_image_aspect_ratio_valid, is_image_size_valid
-from account.utils import token_expire_handler, is_token_expired, expires_in
 
 IMAGE_SIZE_MAX_BYTES = 1024 * 1024 * 2
 DOES_NOT_EXIST = "DOES_NOT_EXIST"
@@ -59,36 +54,36 @@ class BlogPostUpdateSerializer(ModelSerializer):
         model = BlogPost
         fields = ["title", "body", "image", "timestamp"]
 
-    def validate(self, blog_post):
-        try:
-            image = blog_post['image']
-
-            url = os.path.join(settings.TEMP, str(image))
-            storage = FileSystemStorage(location=url)
-
-            with storage.open('', 'wb+') as destination:
-                for chunk in image.chunks():
-                    destination.write(chunk)
-                destination.close()
-
-            if not is_image_size_valid(url, IMAGE_SIZE_MAX_BYTES):
-                os.remove(url)
-                raise ValidationError({
-                    "response": "The image is too large. Image must be less than 2 MB."
-                })
-
-            if not is_image_aspect_ratio_valid(url):
-                os.remove(url)
-                raise ValidationError({
-                    "detail": "Image must be in square pixels."
-                })
-
-            os.remove(url)
-        except (KeyError, ValueError):
-            raise ValidationError({
-                "response": "An error occurred."
-            })
-        return blog_post
+    # def validate(self, blog_post):
+    #     try:
+    #         image = blog_post['image']
+    #
+    #         url = os.path.join(settings.TEMP, str(image))
+    #         storage = FileSystemStorage(location=url)
+    #
+    #         with storage.open('', 'wb+') as destination:
+    #             for chunk in image.chunks():
+    #                 destination.write(chunk)
+    #             destination.close()
+    #
+    #         if not is_image_size_valid(url, IMAGE_SIZE_MAX_BYTES):
+    #             os.remove(url)
+    #             raise ValidationError({
+    #                 "response": "The image is too large. Image must be less than 2 MB."
+    #             })
+    #
+    #         if not is_image_aspect_ratio_valid(url):
+    #             os.remove(url)
+    #             raise ValidationError({
+    #                 "detail": "Image must be in square pixels."
+    #             })
+    #
+    #         os.remove(url)
+    #     except (KeyError, ValueError):
+    #         raise ValidationError({
+    #             "response": "An error occurred."
+    #         })
+    #     return blog_post
 
 
 class BlogPostCreateSerializer(ModelSerializer):
@@ -112,27 +107,6 @@ class BlogPostCreateSerializer(ModelSerializer):
                 timestamp=timestamp,
             )
 
-            url = os.path.join(settings.TEMP, str(image))
-            storage = FileSystemStorage(location=url)
-
-            with storage.open('', 'wb+') as destination:
-                for chunk in image.chunks():
-                    destination.write(chunk)
-                destination.close()
-
-            if not is_image_size_valid(url, IMAGE_SIZE_MAX_BYTES):
-                os.remove(url)
-                raise ValidationError({
-                    "response": "The image is too large. Image must be less than 2 MB."
-                })
-
-            if not is_image_aspect_ratio_valid(url):
-                os.remove(url)
-                raise ValidationError({
-                    "response": "Image must be in square pixels."
-                })
-
-            os.remove(url)
             blog_post.save()
             return blog_post
 

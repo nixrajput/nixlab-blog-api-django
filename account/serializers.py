@@ -1,8 +1,5 @@
-import os
 import datetime
 
-from django.conf import settings
-from django.core.files.storage import FileSystemStorage
 from rest_framework.serializers import (
     ModelSerializer,
     CharField,
@@ -12,10 +9,6 @@ from rest_framework.serializers import (
 )
 
 from account.models import Account, ProfilePicture
-from blog.utils import is_image_aspect_ratio_valid, is_image_size_valid
-
-IMAGE_SIZE_MAX_BYTES = 1024 * 1024 * 2
-DOES_NOT_EXIST = "DOES_NOT_EXIST"
 
 
 class RegistrationSerializer(ModelSerializer):
@@ -70,27 +63,6 @@ class ProfilePictureUploadSerializer(ModelSerializer):
                 timestamp=timestamp,
             )
 
-            url = os.path.join(settings.TEMP, str(image))
-            storage = FileSystemStorage(location=url)
-
-            with storage.open('', 'wb+') as destination:
-                for chunk in image.chunks():
-                    destination.write(chunk)
-                destination.close()
-
-            if not is_image_size_valid(url, IMAGE_SIZE_MAX_BYTES):
-                os.remove(url)
-                raise ValidationError({
-                    "response": "The image is too large. Image must be less than 2 MB."
-                })
-
-            if not is_image_aspect_ratio_valid(url):
-                os.remove(url)
-                raise ValidationError({
-                    "response": "Image must be in square pixels."
-                })
-
-            os.remove(url)
             profile_pic.save()
             return profile_pic
 
@@ -107,7 +79,7 @@ class AccountDetailSerializer(ModelSerializer):
         model = Account
         fields = [
             'id', 'first_name', 'last_name', 'phone', 'username', 'email',
-            'dob', "followers", "following",  'profile_picture',
+            'dob', "followers", "following", 'profile_picture',
         ]
 
     def get_profile_picture(self, obj):

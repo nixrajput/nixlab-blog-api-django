@@ -5,7 +5,6 @@ from django.db import migrations, models
 
 
 class Migration(migrations.Migration):
-
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ('blog', '0005_blogpost_timestamp'),
@@ -20,6 +19,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='blogpost',
             name='likes',
-            field=models.ManyToManyField(blank=True, related_name='blog_post_likes', to=settings.AUTH_USER_MODEL, verbose_name='Likes'),
+            field=models.ManyToManyField(blank=True, related_name='blog_post_likes', to=settings.AUTH_USER_MODEL,
+                                         verbose_name='Likes'),
         ),
     ]
