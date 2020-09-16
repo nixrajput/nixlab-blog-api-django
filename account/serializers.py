@@ -78,8 +78,8 @@ class AccountDetailSerializer(ModelSerializer):
     class Meta:
         model = Account
         fields = [
-            'id', 'first_name', 'last_name', 'phone', 'username', 'email',
-            'dob', "followers", "following", 'profile_picture', "account_type"
+            'id', 'first_name', 'last_name', 'phone', 'username', 'email', 'about',
+            'dob', "followers", "following", 'profile_picture', 'account_type'
         ]
 
     def get_profile_picture(self, obj):
@@ -98,7 +98,7 @@ class AccountPropertiesSerializer(ModelSerializer):
         model = Account
         fields = [
             "first_name", "last_name", "phone", "dob", "account_type",
-            "timestamp", "followers", "following"
+            "timestamp", "followers", "following", "about"
         ]
 
     # def validate(self, account):

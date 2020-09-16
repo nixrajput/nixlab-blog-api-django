@@ -98,6 +98,12 @@ class Account(AbstractBaseUser):
         blank=True,
         verbose_name=_("Account Type")
     )
+    about = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        verbose_name=_("About")
+    )
     last_login = models.DateTimeField(
         auto_now=True,
         verbose_name=_("Last Login"),
