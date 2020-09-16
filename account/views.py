@@ -224,6 +224,7 @@ def update_account_view(request):
             data['email'] = account.email
             data['phone'] = account.phone
             data['dob'] = account.dob
+            data['account_type'] = account.account_type
             data['timestamp'] = account.timestamp
             return Response(data=data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -240,21 +241,6 @@ def does_account_exist_view(request):
             account = Account.objects.get(email=email)
             if account:
                 data['response'] = email
-        except Account.DoesNotExist:
-            data['response'] = DOES_NOT_EXIST
-        return Response(data)
-
-
-@api_view(['GET', ])
-@permission_classes([])
-@authentication_classes([])
-def does_account_exist_view(request):
-    if request.method == 'GET':
-        email = request.GET['email'].lower()
-        data = {}
-        try:
-            account = Account.objects.get(email=email)
-            data['response'] = email
         except Account.DoesNotExist:
             data['response'] = DOES_NOT_EXIST
         return Response(data)

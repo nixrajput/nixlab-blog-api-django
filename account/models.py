@@ -60,13 +60,14 @@ class Account(AbstractBaseUser):
         verbose_name=_("Last Name"),
     )
     email = models.EmailField(
-        max_length=60,
+        max_length=100,
         unique=True,
         verbose_name=_("Email"),
     )
     username = models.CharField(
         max_length=30,
-        unique=True
+        unique=True,
+        verbose_name=_("Username")
     )
     dob = models.DateField(
         blank=True,
@@ -90,6 +91,12 @@ class Account(AbstractBaseUser):
         related_name=_("account_following"),
         blank=True,
         verbose_name=_("Following"),
+    )
+    account_type = models.CharField(
+        max_length=10,
+        default=_("public"),
+        blank=True,
+        verbose_name=_("Account Type")
     )
     last_login = models.DateTimeField(
         auto_now=True,
