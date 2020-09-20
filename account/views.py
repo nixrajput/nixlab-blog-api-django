@@ -230,19 +230,18 @@ def update_account_view(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', ])
+@api_view(['GET'])
 @permission_classes([])
 @authentication_classes([])
-def does_account_exist_view(request):
+def does_account_exist_view(request, user_id):
     if request.method == 'GET':
-        email = request.GET['email']
         data = {}
         try:
-            account = Account.objects.get(email=email)
+            account = Account.objects.get(id=user_id)
             if account:
-                data['response'] = email
+                data['response'] = True
         except Account.DoesNotExist:
-            data['response'] = DOES_NOT_EXIST
+            data['response'] = False
         return Response(data)
 
 
