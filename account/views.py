@@ -238,10 +238,15 @@ def does_account_exist_view(request, user_id):
         data = {}
         try:
             account = Account.objects.get(id=user_id)
-            if account.first_name is None:
+            if account.first_name is None or account.last_name is None or account.phone is None:
                 data['response'] = True
+                data['first_name'] = account.first_name
+                data['last_name'] = account.last_name
+                data['phone'] = account.phone
+            else:
+                data['response'] = False
         except Account.DoesNotExist:
-            data['response'] = False
+            data['response'] = DOES_NOT_EXIST
         return Response(data)
 
 
