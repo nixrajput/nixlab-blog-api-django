@@ -221,9 +221,11 @@ def update_account_view(request):
             serializer.save()
             data['response'] = UPDATE_TEXT
             data['username'] = account.username
-            data['email'] = account.email
+            data['first_name'] = account.first_name
+            data['last_name'] = account.last_name
             data['phone'] = account.phone
             data['dob'] = account.dob
+            data['gender'] = account.gender
             data['account_type'] = account.account_type
             data['timestamp'] = account.timestamp
             return Response(data=data, status=status.HTTP_200_OK)
@@ -240,9 +242,12 @@ def does_account_exist_view(request, user_id):
             account = Account.objects.get(id=user_id)
             if account.first_name is None or account.last_name is None or account.phone is None:
                 data['response'] = True
+                data['uid'] = account.id
                 data['first_name'] = account.first_name
                 data['last_name'] = account.last_name
                 data['phone'] = account.phone
+                data['dob'] = account.dob
+                data['gender'] = account.gender
             else:
                 data['response'] = False
         except Account.DoesNotExist:
