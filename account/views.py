@@ -238,7 +238,7 @@ def does_account_exist_view(request, user_id):
         data = {}
         try:
             account = Account.objects.get(id=user_id)
-            if account:
+            if account.first_name is None:
                 data['response'] = True
         except Account.DoesNotExist:
             data['response'] = False
