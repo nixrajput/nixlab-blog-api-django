@@ -240,7 +240,7 @@ def does_account_exist_view(request, user_id):
         data = {}
         try:
             account = Account.objects.get(id=user_id)
-            if account.first_name is None or account.last_name is None or account.phone is None:
+            if account.first_name is None or account.last_name is None or account.phone is None or account.dob is None or account.gender is None:
                 data['response'] = True
                 data['uid'] = account.id
                 data['first_name'] = account.first_name
