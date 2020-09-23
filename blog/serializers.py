@@ -4,6 +4,8 @@ from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from account.utils import token_expire_handler
 from blog.models import BlogPost
+from account.models import ProfilePicture
+from account.serializers import ProfilePictureSerializer
 
 IMAGE_SIZE_MAX_BYTES = 1024 * 1024 * 2
 DOES_NOT_EXIST = "DOES_NOT_EXIST"
@@ -15,12 +17,13 @@ class BlogPostSerializer(ModelSerializer):
     token = SerializerMethodField()
     like_count = SerializerMethodField()
     is_liked = SerializerMethodField()
+    profile_pic_url = SerializerMethodField()
 
     class Meta:
         model = BlogPost
         fields = [
             "id", "title", "body", "image", "slug", "likes", "like_count",
-            "is_liked", "author", "author_id", "token", "timestamp"
+            "is_liked", "author", "author_id", "profile_pic_url", "token", "timestamp"
         ]
 
     def get_author(self, obj):
@@ -28,6 +31,16 @@ class BlogPostSerializer(ModelSerializer):
 
     def get_author_id(self, obj):
         return obj.author.id
+
+    def get_profile_pic_url(self, obj):
+        try:
+            image = ProfilePicture.objects.filter(user=obj.author.id).order_by('-uploaded_at')[0]
+        except (ProfilePicture.DoesNotExist, IndexError):
+            image = ""
+
+        serializer = ProfilePictureSerializer(image)
+
+        return serializer.data
 
     def get_token(self, obj):
 
