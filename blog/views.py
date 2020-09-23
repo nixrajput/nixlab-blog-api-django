@@ -165,6 +165,7 @@ class ApiBlogListView(ListAPIView):
     permission_classes = [IsAuthenticated]
 
     serializer_class = BlogPostSerializer
+    pagination_class = PageNumberPagination
     filter_backends = (SearchFilter, OrderingFilter)
     search_fields = ('title', 'body', 'author__username')
 
@@ -179,6 +180,7 @@ class ApiUserBlogListView(ListAPIView):
     permission_classes = [IsAuthenticated]
 
     serializer_class = BlogPostSerializer
+    pagination_class = PageNumberPagination
     filter_backends = (SearchFilter, OrderingFilter)
     search_fields = ('title', 'body', 'author__username')
     lookup_url_kwarg = "uid"
