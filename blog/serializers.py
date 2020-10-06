@@ -2,10 +2,10 @@ from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
-from account.utils import token_expire_handler
-from blog.models import BlogPost
 from account.models import ProfilePicture
 from account.serializers import ProfilePictureSerializer
+from account.utils import token_expire_handler
+from blog.models import BlogPost
 
 IMAGE_SIZE_MAX_BYTES = 1024 * 1024 * 2
 DOES_NOT_EXIST = "DOES_NOT_EXIST"

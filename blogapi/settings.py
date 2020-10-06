@@ -26,6 +26,8 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'account',
     'blog',
+    'chats',
+    'feeds',
 ]
 
 REST_FRAMEWORK = {

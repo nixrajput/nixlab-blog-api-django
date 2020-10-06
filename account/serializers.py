@@ -1,5 +1,3 @@
-import datetime
-
 from rest_framework.serializers import (
     ModelSerializer,
     CharField,
