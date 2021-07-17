@@ -21,9 +21,10 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'storages',
+
     'rest_framework',
     'rest_framework.authtoken',
-    'accounts',
+    'account',
     'blog',
     'chats',
     'feeds',
@@ -31,7 +32,7 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'accounts.utils.ExpiringTokenAuthentication',
+        'account.utils.ExpiringTokenAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -42,7 +43,7 @@ REST_FRAMEWORK = {
 
 TOKEN_EXPIRED_AFTER_SECONDS = 604800  # VALID FOR 7 DAYS
 
-AUTH_USER_MODEL = 'accounts.Account'
+AUTH_USER_MODEL = 'account.Account'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 

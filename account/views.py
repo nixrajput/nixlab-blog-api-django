@@ -8,8 +8,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from accounts.models import Account
-from accounts.serializers import (
+from account.models import Account
+from account.serializers import (
     RegistrationSerializer,
     AccountPropertiesSerializer,
     ChangePasswordSerializer,
@@ -17,7 +17,7 @@ from accounts.serializers import (
     AccountDetailSerializer,
     ProfilePictureUploadSerializer
 )
-from accounts.utils import token_expire_handler, expires_in
+from account.utils import token_expire_handler, expires_in
 
 DOES_NOT_EXIST = "DOES_NOT_EXIST"
 EMAIL_EXISTS = "EMAIL_EXISTS"

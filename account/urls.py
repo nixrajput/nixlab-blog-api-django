@@ -1,6 +1,6 @@
 from django.urls import path
 
-from accounts.views import (
+from account.views import (
     registration_view,
     update_account_view,
     ObtainAuthTokenView,
@@ -13,7 +13,7 @@ from accounts.views import (
     api_check_if_following_view,
 )
 
-app_name = "accounts"
+app_name = "account"
 
 urlpatterns = [
     path('register/', registration_view, name="register"),

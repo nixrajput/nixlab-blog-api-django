@@ -6,7 +6,7 @@ from rest_framework.serializers import (
     SerializerMethodField,
 )
 
-from accounts.models import Account, ProfilePicture
+from account.models import Account, ProfilePicture
 from secrets import compare_digest
 
 
@@ -100,9 +100,9 @@ class AccountPropertiesSerializer(ModelSerializer):
             "account_type", "timestamp", "followers", "following", "about"
         ]
 
-    # def validate(self, accounts):
+    # def validate(self, account):
     #     try:
-    #         dob = accounts['dob']
+    #         dob = account['dob']
     #
     #         diff = abs(datetime.date.today() - dob)
     #
@@ -113,7 +113,7 @@ class AccountPropertiesSerializer(ModelSerializer):
     #
     #     except (KeyError, ValueError):
     #         raise ValidationError("An error occurred.")
-    #     return accounts
+    #     return account
 
 
 class ChangePasswordSerializer(Serializer):

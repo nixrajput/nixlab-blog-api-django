@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import site
 
-from accounts.models import Account, ProfilePicture
+from account.models import Account, ProfilePicture
 
 
 class ProfilePictureInline(admin.TabularInline):
