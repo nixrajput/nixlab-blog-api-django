@@ -7,6 +7,7 @@ from rest_framework.serializers import (
 )
 
 from account.models import Account, ProfilePicture
+from secrets import compare_digest
 
 
 class RegistrationSerializer(ModelSerializer):
@@ -26,7 +27,7 @@ class RegistrationSerializer(ModelSerializer):
         password = self.validated_data["password"]
         password2 = self.validated_data["password2"]
 
-        if password != password2:
+        if compare_digest(password, password2):
             raise ValidationError({"error_response": "password doesn't matched."})
         account.set_password(password)
         account.save()
