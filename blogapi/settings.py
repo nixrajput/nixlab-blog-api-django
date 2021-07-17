@@ -9,7 +9,7 @@ load_dotenv(verbose=True, dotenv_path=os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = '%%z8+6phy!#ee^v14^90!o6==lklc8ghpim4%m*%piznc-t@j&'
 
-DEBUG = False
+DEBUG = True
 
 ALLOWED_HOSTS = ['127.0.0.1', 'nixlab-blog-api.herokuapp.com']
 
@@ -21,10 +21,9 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'storages',
-
     'rest_framework',
     'rest_framework.authtoken',
-    'account',
+    'accounts',
     'blog',
     'chats',
     'feeds',
@@ -32,7 +31,7 @@ INSTALLED_APPS = [
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'account.utils.ExpiringTokenAuthentication',
+        'accounts.utils.ExpiringTokenAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -43,7 +42,9 @@ REST_FRAMEWORK = {
 
 TOKEN_EXPIRED_AFTER_SECONDS = 604800  # VALID FOR 7 DAYS
 
-AUTH_USER_MODEL = 'account.Account'
+AUTH_USER_MODEL = 'accounts.Account'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
