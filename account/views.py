@@ -45,8 +45,8 @@ def registration_view(request):
 
         username = request.data.get('username', '0')
         if validate_username(username) is not None:
-            data['response'] = "Error"
-            data['error_message'] = USERNAME_EXISTS
+            data['response'] = USERNAME_EXISTS
+            data['error_message'] = "Username is already in use."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = RegistrationSerializer(data=request.data)
@@ -80,13 +80,13 @@ class ObtainAuthTokenView(APIView):
         password = request.data.get('password', '0')
 
         if validate_username(username) is None:
-            context['response'] = "Error"
-            context['error_message'] = INVALID_USERNAME
+            context['response'] = INVALID_USERNAME
+            context['error_message'] = "Your username is incorrect."
             return Response(context, status=status.HTTP_404_NOT_FOUND)
 
         if validate_password(username, password) is False:
-            context['response'] = "Error"
-            context['error_message'] = INVALID_PASSWORD
+            context['response'] = INVALID_PASSWORD
+            context['error_message'] = "Your password is incorrect."
             return Response(context, status=status.HTTP_404_NOT_FOUND)
 
         if serializer.is_valid():
