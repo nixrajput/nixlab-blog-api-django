@@ -81,7 +81,7 @@ class BlogPost(models.Model):
         verbose_name_plural = _("Blog Posts")
 
     def __str__(self):
-        return self.title
+        return self.slug
 
 
 @receiver(post_delete, sender=BlogPost)

@@ -23,6 +23,38 @@ PERMISSION_DENIED = "PERMISSION_DENIED"
 DOES_NOT_EXIST = "DOES_NOT_EXIST"
 
 
+class ApiBlogListView(ListAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    serializer_class = BlogPostSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = (SearchFilter, OrderingFilter)
+    search_fields = ('title', 'body', 'author__username')
+
+    def get_queryset(self, *args, **kwargs):
+        queryset = BlogPost.objects.filter(is_draft=False).order_by('-date_published')
+
+        return queryset
+
+
+class ApiUserBlogListView(ListAPIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    serializer_class = BlogPostSerializer
+    pagination_class = PageNumberPagination
+    filter_backends = (SearchFilter, OrderingFilter)
+    search_fields = ('title', 'body', 'author__username')
+    lookup_url_kwarg = "uid"
+
+    def get_queryset(self, *args, **kwargs):
+        uid = self.kwargs.get(self.lookup_url_kwarg)
+        queryset = BlogPost.objects.filter(is_draft=False, author=uid).order_by('-date_published')
+
+        return queryset
+
+
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
 def api_detail_blog_view(request, slug):
@@ -87,9 +119,10 @@ def api_delete_blog_view(request, slug):
     try:
         blog_post = BlogPost.objects.get(slug=slug, is_draft=False)
     except BlogPost.DoesNotExist:
-        return Response({"response": DOES_NOT_EXIST},
-                        status=status.HTTP_404_NOT_FOUND
-                        )
+        return Response(
+            {"response": DOES_NOT_EXIST},
+            status=status.HTTP_404_NOT_FOUND
+        )
 
     user = request.user
     if blog_post.author != user:
@@ -160,38 +193,6 @@ def api_create_blog_view(request):
             data['timestamp'] = blog_post.timestamp
             return Response(data=data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class ApiBlogListView(ListAPIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    serializer_class = BlogPostSerializer
-    pagination_class = PageNumberPagination
-    filter_backends = (SearchFilter, OrderingFilter)
-    search_fields = ('title', 'body', 'author__username')
-
-    def get_queryset(self, *args, **kwargs):
-        queryset = BlogPost.objects.filter(is_draft=False).order_by('-date_published')
-
-        return queryset
-
-
-class ApiUserBlogListView(ListAPIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
-
-    serializer_class = BlogPostSerializer
-    pagination_class = PageNumberPagination
-    filter_backends = (SearchFilter, OrderingFilter)
-    search_fields = ('title', 'body', 'author__username')
-    lookup_url_kwarg = "uid"
-
-    def get_queryset(self, *args, **kwargs):
-        uid = self.kwargs.get(self.lookup_url_kwarg)
-        queryset = BlogPost.objects.filter(is_draft=False, author=uid).order_by('-date_published')
-
-        return queryset
 
 
 @api_view(['GET', ])
