@@ -1,3 +1,5 @@
+from secrets import compare_digest
+
 from rest_framework.serializers import (
     ModelSerializer,
     CharField,
@@ -7,7 +9,6 @@ from rest_framework.serializers import (
 )
 
 from account.models import Account, ProfilePicture
-from secrets import compare_digest
 
 
 class RegistrationSerializer(ModelSerializer):

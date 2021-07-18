@@ -29,9 +29,10 @@ def api_detail_blog_view(request, slug):
     try:
         blog_post = BlogPost.objects.get(slug=slug, is_draft=False)
     except BlogPost.DoesNotExist:
-        return Response({"response": DOES_NOT_EXIST},
-                        status=status.HTTP_404_NOT_FOUND
-                        )
+        return Response(
+            {"response": DOES_NOT_EXIST},
+            status=status.HTTP_404_NOT_FOUND
+        )
 
     serializer = BlogPostSerializer(blog_post)
 
