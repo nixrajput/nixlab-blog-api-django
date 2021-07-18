@@ -6,8 +6,8 @@ from blog.models import BlogPost
 
 class BlogPostAdmin(admin.ModelAdmin):
     model = BlogPost
-    list_display = ["title", "author", "date_published"]
-    search_fields = ["title", "body"]
+    list_display = ["slug", "author", "date_published"]
+    search_fields = ["slug", "body", "author"]
 
 
 site.register(BlogPost, BlogPostAdmin)
