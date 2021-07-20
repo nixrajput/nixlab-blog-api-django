@@ -22,6 +22,19 @@ def upload_location(instance, filename):
 
 
 class BlogPost(models.Model):
+    id = models.UUIDField(
+        default=uuid.uuid4,
+        primary_key=True,
+        editable=False,
+        auto_created=True,
+        verbose_name=_("ID"),
+    )
+    image = models.ImageField(
+        upload_to=upload_location,
+        null=True,
+        blank=True,
+        verbose_name=_("Image")
+    )
     title = models.CharField(
         max_length=100,
         null=False,
@@ -33,12 +46,6 @@ class BlogPost(models.Model):
         null=False,
         blank=True,
         verbose_name=_("Body")
-    )
-    image = models.ImageField(
-        upload_to=upload_location,
-        null=True,
-        blank=True,
-        verbose_name=_("Image")
     )
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,

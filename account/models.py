@@ -19,27 +19,28 @@ class MyAccountManager(BaseUserManager):
             raise ValueError('Users must have a username')
 
         user = self.model(
+            first_name=first_name,
+            last_name=last_name,
             email=self.normalize_email(email),
             username=username,
-            first_name=first_name,
-            last_name=last_name
         )
 
         user.set_password(password)
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, first_name, last_name, username, email, password):
+    def create_superuser(self, first_name, last_name, email, username, password):
         user = self.create_user(
-            username=username,
-            email=self.normalize_email(email),
             first_name=first_name,
-            last_name=last_name
+            last_name=last_name,
+            email=self.normalize_email(email),
+            username=username
         )
         user.set_password(password)
         user.is_admin = True
         user.is_staff = True
         user.is_superuser = True
+        user.is_valid = True
         user.save(using=self._db)
         return user
 
@@ -91,6 +92,12 @@ class Account(AbstractBaseUser):
         null=True,
         verbose_name=_("Phone Number"),
     )
+    about = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        verbose_name=_("About")
+    )
     followers = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         related_name=_("account_followers"),
@@ -109,19 +116,13 @@ class Account(AbstractBaseUser):
         blank=True,
         verbose_name=_("Account Type")
     )
-    about = models.CharField(
-        max_length=150,
-        blank=True,
-        null=True,
-        verbose_name=_("About")
-    )
     last_login = models.DateTimeField(
         auto_now=True,
         verbose_name=_("Last Login"),
     )
     is_valid = models.BooleanField(
         default=False,
-        verbose_name=_("Is Verified"),
+        verbose_name=_("Email Verified"),
     )
     is_admin = models.BooleanField(
         default=False,
