@@ -50,13 +50,13 @@ def registration_view(request):
         email = request.data.get('email', '0')
         if validate_email(email) is not None:
             data['response'] = "error"
-            data['error_message'] = "Email is already in use."
+            data['message'] = "Email is already in use."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         username = request.data.get('username', '0')
         if validate_username(username) is not None:
             data['response'] = "error"
-            data['error_message'] = "Username is already in use."
+            data['message'] = "Username is already in use."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = RegistrationSerializer(data=request.data)
