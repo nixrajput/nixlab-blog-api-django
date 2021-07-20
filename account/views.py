@@ -1,4 +1,13 @@
+import smtplib
+
+from django.conf import settings
 from django.contrib.auth import authenticate
+from django.core.mail import send_mail
+from django.shortcuts import render
+from django.template.loader import get_template
+from django.urls import reverse
+from django.utils.encoding import force_bytes, force_text
+from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
@@ -17,6 +26,7 @@ from account.serializers import (
     AccountDetailSerializer,
     ProfilePictureUploadSerializer
 )
+from account.tokens import user_tokenizer
 from account.utils import token_expire_handler, expires_in
 
 DOES_NOT_EXIST = "DOES_NOT_EXIST"
@@ -39,31 +49,95 @@ def registration_view(request):
         data = {}
         email = request.data.get('email', '0')
         if validate_email(email) is not None:
-            data['response'] = "Error"
-            data['error_message'] = EMAIL_EXISTS
+            data['response'] = "error"
+            data['error_message'] = "Email is already in use."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         username = request.data.get('username', '0')
         if validate_username(username) is not None:
-            data['response'] = USERNAME_EXISTS
+            data['response'] = "error"
             data['error_message'] = "Username is already in use."
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         serializer = RegistrationSerializer(data=request.data)
 
         if serializer.is_valid():
-            account = serializer.save()
-            data['response'] = CREATION_TEXT
-            data['id'] = account.id
-            data['email'] = account.email
-            data['username'] = account.username
-            token = Token.objects.get(user=account).key
-            data['token'] = token
-            data['timestamp'] = account.timestamp
-            return Response(data, status=status.HTTP_201_CREATED)
+            account = serializer.save(commit=False)
+
+            token = user_tokenizer.make_token(account)
+            user_id = urlsafe_base64_encode(force_bytes(account.id))
+
+            if settings.DEBUG:
+                domain = "http://127.0.0.1:8000"
+            else:
+                domain = "https://nixlab-blog-api.herokuapp.com"
+
+            url = domain + reverse('account_verification', kwargs={
+                'user_id': user_id,
+                'token': token
+            })
+
+            message = get_template('verify_user.html').render({
+                'url': url,
+                'first_name': account.first_name,
+                'last_name': account.last_name
+            })
+
+            subject = 'Confirm Your Account - NixLab'
+
+            try:
+                res = send_mail(
+                    auth_user=settings.EMAIL_HOST_USER,
+                    auth_password=settings.EMAIL_HOST_PASSWORD,
+                    subject=subject,
+                    message='',
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=[account.email],
+                    html_message=message
+                )
+
+                account.save()
+
+                data['response'] = "account_created"
+                data['mail_response'] = 'success'
+                data['mail_result'] = res
+                data['message'] = "Registration successful. A verification email has been sent to your email. Please " \
+                                  "verify your account to complete registration. If you don't receive an email, " \
+                                  "please make sure you've entered the address you registered with, and check your " \
+                                  "spam folder."
+                return Response(data, status=status.HTTP_201_CREATED)
+            except (smtplib.SMTPException, TimeoutError) as exc:
+                data["response"] = "error"
+                data['mail_response'] = 'error'
+                data['message'] = "An error occurred while sending verification email. Please check your email " \
+                                  "address and try again."
+                data['error'] = str(exc)
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
         else:
-            data = serializer.errors
+            data["response"] = "error"
+            data["message"] = serializer.errors
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+
+def verify_account(request, user_id, token):
+    data = {}
+
+    try:
+        user_id = force_text(urlsafe_base64_decode(user_id))
+        user = Account.objects.get(id=user_id)
+    except (TypeError, ValueError, OverflowError, Account.DoesNotExist):
+        user = None
+    if user is not None and user_tokenizer.check_token(user, token):
+        user.is_valid = True
+        user.save()
+        data['response'] = 'success'
+        data['message'] = 'Verification successful. Please login to your account.'
+    else:
+        data['response'] = 'error'
+        data['message'] = 'An error occurred while verifying your account. Please try to request a new ' \
+                          'verification email.'
+    return render(request, 'success.html', {'data': data})
 
 
 class ObtainAuthTokenView(APIView):
@@ -80,30 +154,36 @@ class ObtainAuthTokenView(APIView):
         password = request.data.get('password', '0')
 
         if validate_username(username) is None:
-            context['response'] = INVALID_USERNAME
-            context['error_message'] = "Your username is incorrect."
+            context['response'] = "error"
+            context['message'] = "Your username is incorrect."
             return Response(context, status=status.HTTP_404_NOT_FOUND)
 
         if validate_password(username, password) is False:
-            context['response'] = INVALID_PASSWORD
-            context['error_message'] = "Your password is incorrect."
+            context['response'] = "error"
+            context['message'] = "Your password is incorrect."
             return Response(context, status=status.HTTP_404_NOT_FOUND)
 
         if serializer.is_valid():
             account = authenticate(username=username, password=password)
 
-            try:
-                token, _ = Token.objects.get_or_create(user=account)
-            except Token.DoesNotExist:
-                token = Token.objects.create(user=account)
+            if account.is_valid:
+                try:
+                    token, _ = Token.objects.get_or_create(user=account)
+                except Token.DoesNotExist:
+                    token = Token.objects.create(user=account)
 
-            is_expired, token = token_expire_handler(token)
+                is_expired, token = token_expire_handler(token)
 
-            context['response'] = SUCCESS_TEXT
-            context['id'] = account.id
-            context['token'] = token.key
-            context['expires_in'] = expires_in(token)
-            return Response(context, status=status.HTTP_200_OK)
+                context['response'] = "success"
+                context["message"] = "Login successful."
+                context['id'] = account.id
+                context['token'] = token.key
+                context['expires_in'] = expires_in(token)
+                return Response(context, status=status.HTTP_200_OK)
+            else:
+                context['response'] = "error"
+                context['message'] = "Your account is not verified. Please verify your account and try again."
+                return Response(context, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -136,8 +216,7 @@ def api_follow_toggle_view(request, user_id):
                         status=status.HTTP_404_NOT_FOUND)
 
     if request.user.is_authenticated:
-        if following_user in user.following.all() and \
-                request.user in following_user.followers.all():
+        if following_user in user.following.all() and request.user in following_user.followers.all():
             user.following.remove(following_user)
             following_user.followers.remove(request.user)
             is_following = False
@@ -240,7 +319,11 @@ def does_account_exist_view(request, user_id):
         data = {}
         try:
             account = Account.objects.get(id=user_id)
-            if account.first_name is None or account.last_name is None or account.phone is None or account.dob is None or account.gender is None:
+            if account.first_name is None or \
+                    account.last_name is None or \
+                    account.phone is None or \
+                    account.dob is None or \
+                    account.gender is None:
                 data['response'] = True
                 data['uid'] = account.id
                 data['first_name'] = account.first_name

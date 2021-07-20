@@ -11,13 +11,13 @@ from account.views import (
     upload_profile_picture,
     api_follow_toggle_view,
     api_check_if_following_view,
+    verify_account
 )
-
-app_name = "account"
 
 urlpatterns = [
     path('register/', registration_view, name="register"),
     path('login/', ObtainAuthTokenView.as_view(), name="login"),
+    path('verify_account/<str:user_id>/<str:token>/', verify_account, name="account_verification"),
     path('check_if_account_exists/<user_id>/', does_account_exist_view, name="check_if_account_exists"),
     path('change_password/', ChangePasswordView.as_view(), name="change_password"),
     path('properties/', account_properties_view, name="properties"),

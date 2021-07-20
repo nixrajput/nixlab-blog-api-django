@@ -17,7 +17,7 @@ class ProfilePictureAdmin(admin.ModelAdmin):
 
 class AccountAdmin(admin.ModelAdmin):
     model = Account
-    list_display = ["email", "username", "is_admin", "is_superuser"]
+    list_display = ["email", "username", "is_admin", "is_valid"]
     search_fields = ["email", "username"]
 
     inlines = [ProfilePictureInline, ]

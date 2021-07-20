@@ -1,5 +1,4 @@
-from secrets import compare_digest
-
+import secrets
 from rest_framework.serializers import (
     ModelSerializer,
     CharField,
@@ -7,7 +6,6 @@ from rest_framework.serializers import (
     Serializer,
     SerializerMethodField,
 )
-
 from account.models import Account, ProfilePicture
 
 
@@ -16,20 +14,46 @@ class RegistrationSerializer(ModelSerializer):
 
     class Meta:
         model = Account
-        fields = ["email", "username", "password", "password2", "timestamp"]
+        fields = ["first_name", "last_name", "email", "username", "password", "password2"]
         extra_kwargs = {"password2": {"write_only": True}}
 
+    def validate(self, data):
+        if not data.get('first_name'):
+            raise ValidationError({'first_name': 'This field is required.'})
+        if not data.get('last_name'):
+            raise ValidationError({'last_name': 'This field is required.'})
+        if not data.get('email'):
+            raise ValidationError({'email': 'This field is required.'})
+        if not data.get('username'):
+            raise ValidationError({'username': 'This field is required.'})
+        if not data.get('password'):
+            raise ValidationError({'password': 'This field is required.'})
+        if not data.get('password2'):
+            raise ValidationError({'password2': 'This field is required.'})
+
+        return data
+
     def save(self, **kwargs):
-        account = Account(
-            email=self.validated_data["email"],
-            username=self.validated_data["username"],
-            timestamp=self.validated_data['timestamp'],
-        )
+
+        first_name = self.validated_data["first_name"]
+        last_name = self.validated_data["last_name"]
+        email = self.validated_data["email"]
+        username = self.validated_data["username"]
         password = self.validated_data["password"]
         password2 = self.validated_data["password2"]
 
-        if compare_digest(password, password2):
-            raise ValidationError({"error_response": "password doesn't matched."})
+        account = Account(
+            first_name=first_name,
+            last_name=last_name,
+            email=email,
+            username=username
+        )
+
+        if not secrets.compare_digest(password, password2):
+            raise ValidationError({
+                'response': 'error',
+                "message": "Password doesn't matched."
+            })
         account.set_password(password)
         account.save()
         return account
