@@ -37,7 +37,7 @@ class BlogPost(models.Model):
     )
     title = models.CharField(
         max_length=500,
-        null=False,
+        null=True,
         blank=True,
         verbose_name=_("About")
     )

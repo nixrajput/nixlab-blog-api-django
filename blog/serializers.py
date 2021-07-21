@@ -97,8 +97,6 @@ class BlogPostCreateSerializer(ModelSerializer):
     def validate(self, data):
         if not data.get('image'):
             raise ValidationError({'image': 'This field is required.'})
-        if not data.get('title'):
-            raise ValidationError({'title': 'This field is required.'})
         if not data.get('author'):
             raise ValidationError({'author': 'This field is required.'})
         return data
