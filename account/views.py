@@ -28,6 +28,7 @@ from account.serializers import (
 )
 from account.tokens import user_tokenizer
 from account.utils import token_expire_handler, expires_in
+from blog.utils import validate_uuid4
 
 DOES_NOT_EXIST = "DOES_NOT_EXIST"
 EMAIL_EXISTS = "EMAIL_EXISTS"
@@ -145,8 +146,7 @@ class ObtainAuthTokenView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-
-        context = {}
+        data = {}
 
         serializer = LoginSerializer(data=request.data)
 
@@ -154,14 +154,14 @@ class ObtainAuthTokenView(APIView):
         password = request.data.get('password', '0')
 
         if validate_username(username) is None:
-            context['response'] = "error"
-            context['message'] = "Your username is incorrect."
-            return Response(context, status=status.HTTP_404_NOT_FOUND)
+            data['response'] = "error"
+            data['message'] = "Your username is incorrect."
+            return Response(data, status=status.HTTP_404_NOT_FOUND)
 
         if validate_password(username, password) is False:
-            context['response'] = "error"
-            context['message'] = "Your password is incorrect."
-            return Response(context, status=status.HTTP_404_NOT_FOUND)
+            data['response'] = "error"
+            data['message'] = "Your password is incorrect."
+            return Response(data, status=status.HTTP_404_NOT_FOUND)
 
         if serializer.is_valid():
             account = authenticate(username=username, password=password)
@@ -174,46 +174,67 @@ class ObtainAuthTokenView(APIView):
 
                 is_expired, token = token_expire_handler(token)
 
-                context['response'] = "success"
-                context["message"] = "Login successful."
-                context['id'] = account.id
-                context['token'] = token.key
-                context['expires_in'] = expires_in(token)
-                return Response(context, status=status.HTTP_200_OK)
+                data['response'] = "success"
+                data["message"] = "Login successful."
+                data['id'] = account.id
+                data['token'] = token.key
+                data['expires_in'] = expires_in(token)
+                return Response(data, status=status.HTTP_200_OK)
             else:
-                context['response'] = "error"
-                context['message'] = "Your account is not verified. Please verify your account and try again."
-                return Response(context, status=status.HTTP_400_BAD_REQUEST)
+                data['response'] = "error"
+                data['message'] = "Your account is not verified. Please verify your account and try again."
+                return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data['response'] = "error"
+        data["message"] = serializer.errors
+        return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
 def detail_user_view(request, user_id):
+    data = {}
+
+    is_uuid = validate_uuid4(user_id)
+    if not is_uuid:
+        data['response'] = "error"
+        data["message"] = "User ID is invalid."
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
     try:
         user = Account.objects.get(id=user_id)
     except Account.DoesNotExist:
-        return Response({'response': DOES_NOT_EXIST},
-                        status=status.HTTP_404_NOT_FOUND)
+        data["response"] = "error"
+        data["message"] = "User not found."
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     serializer = AccountDetailSerializer(user)
 
     if request.method == "GET":
         return Response(serializer.data, status=status.HTTP_200_OK)
-    return Response({'response': serializer.errors, },
-                    status=status.HTTP_400_BAD_REQUEST)
+    data["response"] = "error"
+    data["message"] = serializer.errors
+    return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
 def api_follow_toggle_view(request, user_id):
+    data = {}
+
+    is_uuid = validate_uuid4(user_id)
+    if not is_uuid:
+        data['response'] = "error"
+        data["message"] = "User ID is invalid."
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
     try:
         user = Account.objects.get(id=request.user.id)
         following_user = Account.objects.get(id=user_id)
     except Account.DoesNotExist:
-        return Response({'response': DOES_NOT_EXIST},
-                        status=status.HTTP_404_NOT_FOUND)
+        data["response"] = "error"
+        data["message"] = "User not found."
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.user.is_authenticated:
         if following_user in user.following.all() and request.user in following_user.followers.all():
@@ -227,25 +248,36 @@ def api_follow_toggle_view(request, user_id):
 
         updated = True
 
-        data = {
-            "follower": user.username,
-            "following": following_user.username,
-            "updated": updated,
-            "is_following": is_following
-        }
-
-        return Response(data, status=status.HTTP_200_OK)
+        data["response"] = "success"
+        data["follower"] = user.username
+        data["following"] = following_user.username,
+        data["updated"] = updated
+        data["is_following"] = is_following
+        return Response(data=data, status=status.HTTP_200_OK)
+    else:
+        data["response"] = "error"
+        data["message"] = "User is not authenticated."
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
 
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
 def api_check_if_following_view(request, user_id):
+    data = {}
+
+    is_uuid = validate_uuid4(user_id)
+    if not is_uuid:
+        data['response'] = "error"
+        data["message"] = "User ID is invalid."
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
     try:
         user = Account.objects.get(id=request.user.id)
         following_user = Account.objects.get(id=user_id)
     except Account.DoesNotExist:
-        return Response({'response': DOES_NOT_EXIST},
-                        status=status.HTTP_404_NOT_FOUND)
+        data["response"] = "error"
+        data["message"] = "User not found."
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.user.is_authenticated:
         if following_user in user.following.all() and \
@@ -254,20 +286,21 @@ def api_check_if_following_view(request, user_id):
         else:
             is_following = False
 
-        data = {
-            "follower": user.username,
-            "following": following_user.username,
-            "is_following": is_following
-        }
-
+        data["response"] = "success"
+        data["follower"] = user.username
+        data["following"] = following_user.username,
+        data["is_following"] = is_following
         return Response(data, status=status.HTTP_200_OK)
+    else:
+        data["response"] = "error"
+        data["message"] = "User is not authenticated."
+        return Response(data=data, status=status.HTTP_401_UNAUTHORIZED)
 
 
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
 def upload_profile_picture(request):
     if request.method == "POST":
-
         data = request.data
         data['user'] = request.user.id
         serializer = ProfilePictureUploadSerializer(data=data)
@@ -275,67 +308,74 @@ def upload_profile_picture(request):
         data = {}
         if serializer.is_valid():
             profile_pic = serializer.save()
-            data['response'] = UPLOAD_SUCCESS
+            data['response'] = "success"
+            data["message"] = "Profile picture uploaded."
             data['id'] = profile_pic.id
-            data['image'] = profile_pic.image.url
-            data['user'] = profile_pic.user.username
-            data['timestamp'] = profile_pic.timestamp
+            data['user_id'] = profile_pic.user.id
+            data['uploaded_at'] = profile_pic.uploaded_at
             return Response(data=data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data["response"] = "error"
+        data["message"] = serializer.errors
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["PUT"])
 @permission_classes((IsAuthenticated,))
 def update_account_view(request):
+    data = {}
+
     try:
         account = request.user
     except Account.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
+        data["response"] = "error"
+        data["message"] = "User not found."
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "PUT":
         serializer = AccountPropertiesSerializer(account, data=request.data, partial=True)
-        data = {}
 
         if serializer.is_valid():
             serializer.save()
-            data['response'] = UPDATE_TEXT
-            data['username'] = account.username
-            data['first_name'] = account.first_name
-            data['last_name'] = account.last_name
-            data['phone'] = account.phone
-            data['dob'] = account.dob
-            data['gender'] = account.gender
-            data['account_type'] = account.account_type
-            data['timestamp'] = account.timestamp
+            data['response'] = "success"
+            data["message"] = "User details updated."
+            data["user_id"] = account.id
+            data['last_updated'] = account.last_updated
             return Response(data=data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data["response"] = "error"
+        data["message"] = serializer.errors
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
-@permission_classes([])
-@authentication_classes([])
-def does_account_exist_view(request, user_id):
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
+def is_account_complete_view(request):
+    data = {}
+
+    try:
+        account = request.user
+    except Account.DoesNotExist:
+        data["response"] = "error"
+        data["message"] = "User not found."
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+
     if request.method == 'GET':
-        data = {}
-        try:
-            account = Account.objects.get(id=user_id)
-            if account.first_name is None or \
-                    account.last_name is None or \
-                    account.phone is None or \
-                    account.dob is None or \
-                    account.gender is None:
-                data['response'] = True
-                data['uid'] = account.id
-                data['first_name'] = account.first_name
-                data['last_name'] = account.last_name
-                data['phone'] = account.phone
-                data['dob'] = account.dob
-                data['gender'] = account.gender
-            else:
-                data['response'] = False
-        except Account.DoesNotExist:
-            data['response'] = DOES_NOT_EXIST
-        return Response(data)
+        if account.first_name is None or \
+                account.last_name is None or \
+                account.dob is None or \
+                account.about is None or \
+                account.gender is None:
+            data['response'] = "success"
+            data['uid'] = account.id
+            data['is_complete'] = False
+            data["message"] = "User profile setup is not complete."
+            return Response(data, status=status.HTTP_200_OK)
+        else:
+            data['response'] = "success"
+            data['uid'] = account.id
+            data['is_complete'] = True
+            data["message"] = "User profile setup is complete."
+            return Response(data, status=status.HTTP_200_OK)
 
 
 class ChangePasswordView(UpdateAPIView):

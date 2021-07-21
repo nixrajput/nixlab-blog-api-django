@@ -105,8 +105,9 @@ class AccountDetailSerializer(ModelSerializer):
     class Meta:
         model = Account
         fields = [
-            'id', 'first_name', 'last_name', 'phone', 'username', 'email', 'about',
-            'dob', 'gender', "followers", "following", 'profile_picture', 'account_type'
+            'id', 'first_name', 'last_name', 'phone', 'username', 'email',
+            'about', 'dob', 'is_valid', 'gender', "followers", "following",
+            'profile_picture', 'account_type', 'date_joined', 'last_login'
         ]
 
     def get_profile_picture(self, obj):
@@ -125,23 +126,8 @@ class AccountPropertiesSerializer(ModelSerializer):
         model = Account
         fields = [
             "first_name", "last_name", "phone", "dob", 'gender',
-            "account_type", "timestamp", "followers", "following", "about"
+            "about", "account_type", "last_updated"
         ]
-
-    # def validate(self, account):
-    #     try:
-    #         dob = account['dob']
-    #
-    #         diff = abs(datetime.date.today() - dob)
-    #
-    #         if (diff.days / 365) < 6:
-    #             raise ValidationError({
-    #                 'detail': "You are too young. Your age should be more than 6 years."
-    #             })
-    #
-    #     except (KeyError, ValueError):
-    #         raise ValidationError("An error occurred.")
-    #     return account
 
 
 class ChangePasswordSerializer(Serializer):

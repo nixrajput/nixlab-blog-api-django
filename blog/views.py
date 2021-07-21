@@ -8,6 +8,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from blog.models import BlogPost
+from blog.utils import validate_uuid4
 from blog.serializers import (
     BlogPostSerializer,
     BlogPostUpdateSerializer,
@@ -60,6 +61,12 @@ class ApiUserBlogListView(ListAPIView):
 def api_detail_blog_view(request, post_id):
     data = {}
 
+    is_uuid = validate_uuid4(post_id)
+    if not is_uuid:
+        data['response'] = "error"
+        data["message"] = "Post ID is invalid."
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
     try:
         blog_post = BlogPost.objects.get(id=post_id, is_draft=False)
     except BlogPost.DoesNotExist:
@@ -80,6 +87,12 @@ def api_detail_blog_view(request, post_id):
 @permission_classes((IsAuthenticated,))
 def api_update_blog_view(request, post_id):
     data = {}
+
+    is_uuid = validate_uuid4(post_id)
+    if not is_uuid:
+        data['response'] = "error"
+        data["message"] = "Post ID is invalid."
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
     try:
         blog_post = BlogPost.objects.get(id=post_id, is_draft=False)
@@ -114,6 +127,13 @@ def api_update_blog_view(request, post_id):
 @permission_classes((IsAuthenticated,))
 def api_delete_blog_view(request, post_id):
     data = {}
+
+    is_uuid = validate_uuid4(post_id)
+    if not is_uuid:
+        data['response'] = "error"
+        data["message"] = "Post ID is invalid."
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
     try:
         blog_post = BlogPost.objects.get(id=post_id, is_draft=False)
     except BlogPost.DoesNotExist:
@@ -144,6 +164,12 @@ def api_delete_blog_view(request, post_id):
 def api_like_toggle_view(request, post_id):
     data = {}
 
+    is_uuid = validate_uuid4(post_id)
+    if not is_uuid:
+        data['response'] = "error"
+        data["message"] = "Post ID is invalid."
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
     try:
         blog_post = BlogPost.objects.get(id=post_id, is_draft=False)
     except BlogPost.DoesNotExist:
@@ -164,6 +190,10 @@ def api_like_toggle_view(request, post_id):
         data["updated"] = updated
         data["liked"] = liked
         return Response(data, status=status.HTTP_200_OK)
+    else:
+        data["response"] = "error"
+        data["message"] = "An error occurred"
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["POST"])

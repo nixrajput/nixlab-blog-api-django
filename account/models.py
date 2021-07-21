@@ -206,18 +206,16 @@ class ProfilePicture(models.Model):
         upload_to=image_path,
         null=True,
         blank=True,
-        verbose_name=_('Picture'),
+        verbose_name=_('Image'),
     )
 
     uploaded_at = models.DateTimeField(
-        auto_now=True,
-        verbose_name=_('Upload Time'),
+        auto_now_add=True,
+        verbose_name=_('Date Uploaded'),
     )
-    timestamp = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        verbose_name=_("Timestamp")
+    last_updated = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_("Last Updated")
     )
 
     class Meta:
