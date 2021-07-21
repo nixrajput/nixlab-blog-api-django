@@ -182,7 +182,9 @@ def api_create_blog_view(request):
             data['message'] = "Post created successfully."
             data['id'] = blog_post.id
             return Response(data=data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data["response"] = "error"
+        data["message"] = serializer.errors
+        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', ])
