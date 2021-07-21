@@ -171,9 +171,9 @@ def api_like_toggle_view(request, slug):
 def api_create_blog_view(request):
     if request.method == "POST":
 
-        data = request.data
-        data['author'] = request.user.id
-        serializer = BlogPostCreateSerializer(data=data)
+        req_data = request.data
+        req_data['author'] = request.user.id
+        serializer = BlogPostCreateSerializer(data=req_data)
 
         data = {}
         if serializer.is_valid():
