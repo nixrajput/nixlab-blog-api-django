@@ -36,16 +36,10 @@ class BlogPost(models.Model):
         verbose_name=_("Image")
     )
     title = models.CharField(
-        max_length=100,
-        null=False,
-        blank=True,
-        verbose_name=_("Title")
-    )
-    body = models.CharField(
         max_length=500,
         null=False,
         blank=True,
-        verbose_name=_("Body")
+        verbose_name=_("About")
     )
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -72,15 +66,9 @@ class BlogPost(models.Model):
         auto_now_add=True,
         verbose_name=_("Date Published")
     )
-    date_updated = models.DateTimeField(
+    last_updated = models.DateTimeField(
         auto_now=True,
         verbose_name=_("Date Updated")
-    )
-    timestamp = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        verbose_name=_("Timestamp")
     )
 
     class Meta:

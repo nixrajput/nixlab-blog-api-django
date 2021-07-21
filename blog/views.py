@@ -57,17 +57,17 @@ class ApiUserBlogListView(ListAPIView):
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
-def api_detail_blog_view(request, slug):
+def api_detail_blog_view(request, post_id):
     data = {}
 
     try:
-        blog_post = BlogPost.objects.get(slug=slug, is_draft=False)
+        blog_post = BlogPost.objects.get(id=post_id, is_draft=False)
     except BlogPost.DoesNotExist:
         data['response'] = "error"
         data["message"] = "Post doesn't found."
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
-    serializer = BlogPostSerializer(blog_post)
+    serializer = BlogPostSerializer(blog_post, context={'request': request})
 
     if request.method == "GET":
         return Response(serializer.data, status=status.HTTP_200_OK)
@@ -78,11 +78,11 @@ def api_detail_blog_view(request, slug):
 
 @api_view(["PUT"])
 @permission_classes((IsAuthenticated,))
-def api_update_blog_view(request, slug):
+def api_update_blog_view(request, post_id):
     data = {}
 
     try:
-        blog_post = BlogPost.objects.get(slug=slug, is_draft=False)
+        blog_post = BlogPost.objects.get(id=post_id, is_draft=False)
     except BlogPost.DoesNotExist:
         data['response'] = "error"
         data["message"] = "Post doesn't found."
@@ -112,10 +112,10 @@ def api_update_blog_view(request, slug):
 
 @api_view(["DELETE"])
 @permission_classes((IsAuthenticated,))
-def api_delete_blog_view(request, slug):
+def api_delete_blog_view(request, post_id):
     data = {}
     try:
-        blog_post = BlogPost.objects.get(slug=slug, is_draft=False)
+        blog_post = BlogPost.objects.get(id=post_id, is_draft=False)
     except BlogPost.DoesNotExist:
         data['response'] = "error"
         data["message"] = "Post doesn't found."
@@ -141,11 +141,11 @@ def api_delete_blog_view(request, slug):
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
-def api_like_toggle_view(request, slug):
+def api_like_toggle_view(request, post_id):
     data = {}
 
     try:
-        blog_post = BlogPost.objects.get(slug=slug, is_draft=False)
+        blog_post = BlogPost.objects.get(id=post_id, is_draft=False)
     except BlogPost.DoesNotExist:
         data['response'] = "error"
         data["message"] = "Post doesn't found."
@@ -189,9 +189,9 @@ def api_create_blog_view(request):
 
 @api_view(['GET', ])
 @permission_classes((IsAuthenticated,))
-def api_is_author_of_blogpost(request, slug):
+def api_is_author_of_blogpost(request, post_id):
     try:
-        blog_post = BlogPost.objects.get(slug=slug, is_draft=False)
+        blog_post = BlogPost.objects.get(id=post_id, is_draft=False)
     except BlogPost.DoesNotExist:
         return Response(status=status.HTTP_404_NOT_FOUND)
 

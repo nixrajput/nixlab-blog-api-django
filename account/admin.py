@@ -17,6 +17,7 @@ class ProfilePictureAdmin(admin.ModelAdmin):
 
 class AccountAdmin(admin.ModelAdmin):
     model = Account
+    readonly_fields = ["date_joined", "last_updated"]
     list_display = ["email", "username", "is_admin", "is_valid"]
     search_fields = ["email", "username"]
 

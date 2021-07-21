@@ -144,11 +144,9 @@ class Account(AbstractBaseUser):
         auto_now_add=True,
         verbose_name=_("Date Joined"),
     )
-    timestamp = models.CharField(
-        max_length=100,
-        null=True,
-        blank=True,
-        verbose_name=_("Timestamp")
+    last_updated = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_("Last Updated"),
     )
 
     USERNAME_FIELD = 'username'

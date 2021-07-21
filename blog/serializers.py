@@ -13,7 +13,6 @@ class BlogPostSerializer(ModelSerializer):
     author_name = SerializerMethodField()
     author_username = SerializerMethodField()
     author_id = SerializerMethodField()
-    token = SerializerMethodField()
     like_count = SerializerMethodField()
     is_liked = SerializerMethodField()
     profile_pic_url = SerializerMethodField()
@@ -21,7 +20,7 @@ class BlogPostSerializer(ModelSerializer):
     class Meta:
         model = BlogPost
         fields = [
-            "id", "title", "body", "image", "slug", "likes", "like_count", "date_published",
+            "id", "title", "image", "slug", "likes", "like_count", "date_published", "last_updated",
             "is_liked", "author_name", "author_username", "author_id", "profile_pic_url"
         ]
 
@@ -44,17 +43,6 @@ class BlogPostSerializer(ModelSerializer):
 
         return serializer.data
 
-    # def get_token(self, obj):
-    #
-    #     try:
-    #         token, _ = Token.objects.get_or_create(user=obj.author)
-    #     except Token.DoesNotExist:
-    #         raise ValidationError(DOES_NOT_EXIST)
-    #
-    #     is_expired, token = token_expire_handler(token)
-    #
-    #     return token.key
-
     def get_like_count(self, obj):
         return obj.likes.count()
 
@@ -67,7 +55,7 @@ class BlogPostSerializer(ModelSerializer):
 class BlogPostUpdateSerializer(ModelSerializer):
     class Meta:
         model = BlogPost
-        fields = ["title", "body", "image", "timestamp"]
+        fields = ["title", "image"]
 
     # def validate(self, blog_post):
     #     try:
