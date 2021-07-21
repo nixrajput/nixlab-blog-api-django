@@ -1,4 +1,5 @@
 import secrets
+
 from rest_framework.serializers import (
     ModelSerializer,
     CharField,
@@ -6,6 +7,7 @@ from rest_framework.serializers import (
     Serializer,
     SerializerMethodField,
 )
+
 from account.models import Account, ProfilePicture
 
 

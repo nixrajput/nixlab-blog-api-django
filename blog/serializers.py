@@ -1,4 +1,3 @@
-from rest_framework.authtoken.models import Token
 from rest_framework.exceptions import ValidationError
 from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
@@ -107,25 +106,24 @@ class BlogPostCreateSerializer(ModelSerializer):
         model = BlogPost
         fields = ["title", "body", "image", "author"]
 
+    def validate(self, data):
+        if not data.get('image'):
+            raise ValidationError({'image': 'This field is required.'})
+        if not data.get('author'):
+            raise ValidationError({'author': 'This field is required.'})
+
     def save(self):
+        author = self.validated_data['author']
+        title = self.validated_data['title']
+        body = self.validated_data['body']
+        image = self.validated_data['image']
 
-        try:
-            author = self.validated_data['author']
-            title = self.validated_data['title']
-            body = self.validated_data['body']
-            image = self.validated_data['image']
+        blog_post = BlogPost(
+            author=author,
+            title=title,
+            body=body,
+            image=image
+        )
 
-            blog_post = BlogPost(
-                author=author,
-                title=title,
-                body=body,
-                image=image
-            )
-
-            blog_post.save()
-            return blog_post
-
-        except KeyError:
-            raise ValidationError({
-                "response": "You must have all the fields not null."
-            })
+        blog_post.save()
+        return blog_post
