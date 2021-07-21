@@ -182,7 +182,8 @@ def api_create_blog_view(request):
         data = {}
         if serializer.is_valid():
             blog_post = serializer.save()
-            data['response'] = CREATE_SUCCESS
+            data['response'] = "success"
+            data['message'] = "Post created successfully."
             data['id'] = blog_post.id
             data['title'] = blog_post.title
             data['body'] = blog_post.body

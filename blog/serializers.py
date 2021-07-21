@@ -4,7 +4,6 @@ from rest_framework.serializers import ModelSerializer, SerializerMethodField
 
 from account.models import ProfilePicture
 from account.serializers import ProfilePictureSerializer
-from account.utils import token_expire_handler
 from blog.models import BlogPost
 
 IMAGE_SIZE_MAX_BYTES = 1024 * 1024 * 2
@@ -12,7 +11,8 @@ DOES_NOT_EXIST = "DOES_NOT_EXIST"
 
 
 class BlogPostSerializer(ModelSerializer):
-    author = SerializerMethodField()
+    author_name = SerializerMethodField()
+    author_username = SerializerMethodField()
     author_id = SerializerMethodField()
     token = SerializerMethodField()
     like_count = SerializerMethodField()
@@ -22,11 +22,14 @@ class BlogPostSerializer(ModelSerializer):
     class Meta:
         model = BlogPost
         fields = [
-            "id", "title", "body", "image", "slug", "likes", "like_count",
-            "is_liked", "author", "author_id", "profile_pic_url", "token", "timestamp"
+            "id", "title", "body", "image", "slug", "likes", "like_count", "date_published",
+            "is_liked", "author_name", "author_username", "author_id", "profile_pic_url"
         ]
 
-    def get_author(self, obj):
+    def get_author_name(self, obj):
+        return obj.author.first_name + " " + obj.author.last_name
+
+    def get_author_username(self, obj):
         return obj.author.username
 
     def get_author_id(self, obj):
@@ -42,16 +45,16 @@ class BlogPostSerializer(ModelSerializer):
 
         return serializer.data
 
-    def get_token(self, obj):
-
-        try:
-            token, _ = Token.objects.get_or_create(user=obj.author)
-        except Token.DoesNotExist:
-            raise ValidationError(DOES_NOT_EXIST)
-
-        is_expired, token = token_expire_handler(token)
-
-        return token.key
+    # def get_token(self, obj):
+    #
+    #     try:
+    #         token, _ = Token.objects.get_or_create(user=obj.author)
+    #     except Token.DoesNotExist:
+    #         raise ValidationError(DOES_NOT_EXIST)
+    #
+    #     is_expired, token = token_expire_handler(token)
+    #
+    #     return token.key
 
     def get_like_count(self, obj):
         return obj.likes.count()
@@ -102,22 +105,21 @@ class BlogPostUpdateSerializer(ModelSerializer):
 class BlogPostCreateSerializer(ModelSerializer):
     class Meta:
         model = BlogPost
-        fields = ["title", "body", "image", "author", "timestamp"]
+        fields = ["title", "body", "image", "author"]
 
     def save(self):
 
         try:
+            author = self.validated_data['author']
             title = self.validated_data['title']
             body = self.validated_data['body']
             image = self.validated_data['image']
-            timestamp = self.validated_data['timestamp']
 
             blog_post = BlogPost(
-                author=self.validated_data['author'],
+                author=author,
                 title=title,
                 body=body,
-                image=image,
-                timestamp=timestamp,
+                image=image
             )
 
             blog_post.save()
