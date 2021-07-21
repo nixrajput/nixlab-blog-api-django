@@ -11,8 +11,6 @@ from blog.views import (
     api_like_toggle_view,
 )
 
-app_name = "blog"
-
 urlpatterns = [
     path('', ApiBlogListView.as_view(), name="list"),
     path('list/<uid>/', ApiUserBlogListView.as_view(), name='post_list'),

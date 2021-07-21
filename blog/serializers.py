@@ -104,24 +104,25 @@ class BlogPostUpdateSerializer(ModelSerializer):
 class BlogPostCreateSerializer(ModelSerializer):
     class Meta:
         model = BlogPost
-        fields = ["title", "body", "image", "author"]
+        fields = ["title", "image", "author"]
 
     def validate(self, data):
         if not data.get('image'):
             raise ValidationError({'image': 'This field is required.'})
+        if not data.get('title'):
+            raise ValidationError({'title': 'This field is required.'})
         if not data.get('author'):
             raise ValidationError({'author': 'This field is required.'})
+        return data
 
     def save(self):
         author = self.validated_data['author']
         title = self.validated_data['title']
-        body = self.validated_data['body']
         image = self.validated_data['image']
 
         blog_post = BlogPost(
             author=author,
             title=title,
-            body=body,
             image=image
         )
 
