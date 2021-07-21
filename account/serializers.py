@@ -46,7 +46,8 @@ class RegistrationSerializer(ModelSerializer):
             first_name=first_name,
             last_name=last_name,
             email=email,
-            username=username
+            username=username,
+            about="Hello there, I am {f_name} {l_name}.".format(f_name=first_name, l_name=last_name)
         )
 
         if not secrets.compare_digest(password, password2):
