@@ -192,6 +192,7 @@ class ObtainAuthTokenView(APIView):
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
+@authentication_classes([TokenAuthentication])
 def detail_user_view(request, user_id):
     data = {}
 
@@ -219,6 +220,7 @@ def detail_user_view(request, user_id):
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
+@authentication_classes([TokenAuthentication])
 def api_follow_toggle_view(request, user_id):
     data = {}
 
@@ -262,6 +264,7 @@ def api_follow_toggle_view(request, user_id):
 
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
+@authentication_classes([TokenAuthentication])
 def api_check_if_following_view(request, user_id):
     data = {}
 
@@ -299,11 +302,12 @@ def api_check_if_following_view(request, user_id):
 
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
-def upload_profile_picture(request):
+@authentication_classes([TokenAuthentication])
+def upload_profile_picture_view(request):
     if request.method == "POST":
-        data = request.data
-        data['user'] = request.user.id
-        serializer = ProfilePictureUploadSerializer(data=data)
+        req_data = request.data
+        req_data['user'] = request.user.id
+        serializer = ProfilePictureUploadSerializer(data=req_data)
 
         data = {}
         if serializer.is_valid():
@@ -321,6 +325,7 @@ def upload_profile_picture(request):
 
 @api_view(["PUT"])
 @permission_classes((IsAuthenticated,))
+@authentication_classes([TokenAuthentication])
 def update_account_view(request):
     data = {}
 
@@ -413,6 +418,7 @@ class ChangePasswordView(UpdateAPIView):
 
 @api_view(['GET', ])
 @permission_classes((IsAuthenticated,))
+@authentication_classes([TokenAuthentication])
 def account_properties_view(request):
     try:
         account = request.user

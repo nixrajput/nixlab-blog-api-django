@@ -213,10 +213,6 @@ class ProfilePicture(models.Model):
         auto_now_add=True,
         verbose_name=_('Date Uploaded'),
     )
-    last_updated = models.DateTimeField(
-        auto_now=True,
-        verbose_name=_("Last Updated")
-    )
 
     class Meta:
         verbose_name = _("Profile Picture")

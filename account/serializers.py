@@ -70,33 +70,29 @@ class LoginSerializer(Serializer):
 class ProfilePictureSerializer(ModelSerializer):
     class Meta:
         model = ProfilePicture
-        fields = ['image']
+        fields = ['id', 'image']
 
 
 class ProfilePictureUploadSerializer(ModelSerializer):
     class Meta:
         model = ProfilePicture
-        fields = ['user', 'image', 'timestamp']
+        fields = ['user', 'image']
+
+    def validate(self, data):
+        if not data.get('image'):
+            raise ValidationError({'image': 'This field is required.'})
+        return data
 
     def save(self):
+        image = self.validated_data['image']
 
-        try:
-            image = self.validated_data['image']
-            timestamp = self.validated_data['timestamp']
+        profile_pic = ProfilePicture(
+            user=self.validated_data['user'],
+            image=image
+        )
 
-            profile_pic = ProfilePicture(
-                user=self.validated_data['user'],
-                image=image,
-                timestamp=timestamp,
-            )
-
-            profile_pic.save()
-            return profile_pic
-
-        except KeyError:
-            raise ValidationError({
-                "response": "You must have all the fields not null."
-            })
+        profile_pic.save()
+        return profile_pic
 
 
 class AccountDetailSerializer(ModelSerializer):
