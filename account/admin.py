@@ -11,14 +11,16 @@ class ProfilePictureInline(admin.TabularInline):
 
 
 class ProfilePictureAdmin(admin.ModelAdmin):
+    readonly_fields = ["uploaded_at"]
     list_filter = ('user', 'uploaded_at')
+    list_display = ["id", "user", "uploaded_at"]
     ordering = ("-uploaded_at",)
 
 
 class AccountAdmin(admin.ModelAdmin):
     model = Account
     readonly_fields = ["date_joined", "last_updated"]
-    list_display = ["email", "username", "is_admin", "is_valid"]
+    list_display = ["id", "username", "is_admin", "is_valid"]
     search_fields = ["email", "username"]
 
     inlines = [ProfilePictureInline, ]
