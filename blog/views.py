@@ -182,14 +182,17 @@ def api_like_toggle_view(request, post_id):
         if request.user in blog_post.likes.all():
             blog_post.likes.remove(request.user)
             liked = False
+            message = "Like removed."
         else:
             blog_post.likes.add(request.user)
             liked = True
+            message = "Post liked."
 
         updated = True
 
         data["updated"] = updated
         data["liked"] = liked
+        data["message"] = message
         return Response(data, status=status.HTTP_200_OK)
     else:
         data["response"] = "error"
