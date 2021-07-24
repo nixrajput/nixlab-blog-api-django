@@ -86,9 +86,8 @@ def submission_delete(sender, instance, **kwargs):
 
 def pre_save_blog_post_receiver(sender, instance, *args, **kwargs):
     if not instance.slug:
-        rand_str1 = get_random_alphanumeric_string(8)
-        rand_str2 = get_random_alphanumeric_string(8)
-        instance.slug = slugify(rand_str1 + instance.title + rand_str2)
+        rand_str = get_random_alphanumeric_string(16)
+        instance.slug = slugify(instance.title + "-" + rand_str)
 
 
 pre_save.connect(pre_save_blog_post_receiver, sender=BlogPost)
