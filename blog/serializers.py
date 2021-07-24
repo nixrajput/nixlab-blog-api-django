@@ -108,7 +108,7 @@ class BlogPostCreateSerializer(ModelSerializer):
         if self.validated_data['title'] is not None:
             title = self.validated_data['title']
         else:
-            title = ""
+            title = None
         image = self.validated_data['image']
 
         blog_post = BlogPost(
