@@ -99,11 +99,16 @@ class BlogPostCreateSerializer(ModelSerializer):
             raise ValidationError({'image': 'This field is required.'})
         if not data.get('author'):
             raise ValidationError({'author': 'This field is required.'})
+        if not data.get('title'):
+            data['title'] = None
         return data
 
     def save(self):
         author = self.validated_data['author']
-        title = self.validated_data['title']
+        if self.validated_data['title'] is not None:
+            title = self.validated_data['title']
+        else:
+            title = ""
         image = self.validated_data['image']
 
         blog_post = BlogPost(
