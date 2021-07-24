@@ -317,7 +317,7 @@ def upload_profile_picture_view(request):
             data['id'] = profile_pic.id
             data['user_id'] = profile_pic.user.id
             data['uploaded_at'] = profile_pic.uploaded_at
-            return Response(data=data, status=status.HTTP_201_CREATED)
+            return Response(data=data, status=status.HTTP_200_OK)
         data["response"] = "error"
         data["message"] = serializer.errors
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
