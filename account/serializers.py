@@ -121,8 +121,8 @@ class AccountPropertiesSerializer(ModelSerializer):
     class Meta:
         model = Account
         fields = [
-            "first_name", "last_name", "phone", "dob", 'gender',
-            "about", "account_type", "last_updated"
+            "first_name", "last_name", "phone",
+            "dob", 'gender', "about"
         ]
 
 
