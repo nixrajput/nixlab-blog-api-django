@@ -214,7 +214,7 @@ def detail_user_view(request, user_id):
     if request.method == "GET":
         return Response(serializer.data, status=status.HTTP_200_OK)
     data["response"] = "error"
-    data["message"] = serializer.errors
+    data["message"] = serializer.errors.__str__()
     return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
