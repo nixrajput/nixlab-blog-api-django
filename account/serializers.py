@@ -1,4 +1,5 @@
 import secrets
+from datetime import datetime, date
 
 from rest_framework.serializers import (
     ModelSerializer,
@@ -132,6 +133,14 @@ class AccountPropertiesSerializer(ModelSerializer):
             raise ValidationError({'last_name': 'This field is required.'})
         if data.get('phone') and len(data.get('phone')) < 10:
             raise ValidationError({'email': 'Phone number is invalid.'})
+        if data.get('dob'):
+            birthDate = datetime.strptime(str(data["dob"]), "%Y-%m-%d").date()
+            today = date.today()
+            age = today.year - birthDate.year - ((today.month, today.day) <
+                                                 (birthDate.month, birthDate.day))
+            if age < 6:
+                raise ValidationError({"dob": 'You must be older than 6 years old.'})
+            data["dob"] = birthDate
 
         return data
 
