@@ -15,14 +15,6 @@ from blog.serializers import (
     BlogPostCreateSerializer,
 )
 
-SUCCESS = "SUCCESS"
-ERROR = "ERROR"
-DELETE_SUCCESS = "DELETED"
-UPDATE_SUCCESS = "UPDATED"
-CREATE_SUCCESS = "CREATED"
-PERMISSION_DENIED = "PERMISSION_DENIED"
-DOES_NOT_EXIST = "DOES_NOT_EXIST"
-
 
 class ApiBlogListView(ListAPIView):
     authentication_classes = [TokenAuthentication]
@@ -80,7 +72,7 @@ def api_detail_blog_view(request, post_id):
     if request.method == "GET":
         return Response(serializer.data, status=status.HTTP_200_OK)
     data["response"] = "error"
-    data["message"] = serializer.errors
+    data["message"] = serializer.errors.__str__()
     return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -121,7 +113,7 @@ def api_update_blog_view(request, post_id):
             data['message'] = "Post updated successfully"
             data['id'] = blog_post.id
             return Response(data=data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        return Response(serializer.errors.__str__(), status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["DELETE"])
@@ -207,18 +199,21 @@ def api_create_blog_view(request):
 
         req_data = request.data
         req_data['author'] = request.user.id
+
         serializer = BlogPostCreateSerializer(data=req_data)
 
         data = {}
         if serializer.is_valid():
             blog_post = serializer.save()
             data['response'] = "success"
-            data['message'] = "Post created successfully."
             data['id'] = blog_post.id
+            data['message'] = "Post created successfully."
             return Response(data=data, status=status.HTTP_201_CREATED)
-        data["response"] = "error"
-        data["message"] = serializer.errors
-        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            data["response"] = "error"
+            data["message"] = serializer.errors.__str__()
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', ])

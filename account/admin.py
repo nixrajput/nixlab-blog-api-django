@@ -23,7 +23,7 @@ class AccountAdmin(admin.ModelAdmin):
     list_display = ["id", "username", "is_admin", "is_valid"]
     search_fields = ["email", "username"]
 
-    inlines = [ProfilePictureInline, ]
+    inlines = [ProfilePictureInline]
 
 
 site.register(Account, AccountAdmin)

@@ -15,8 +15,8 @@ def upload_location(instance, filename):
     base_filename, file_extension = os.path.splitext(filename)
     rand_str = uuid.uuid4()
 
-    filepath = 'uploads/{author_id}/{random_string}{ext}'.format(
-        author_id=str(instance.author.id), random_string=rand_str, ext=file_extension
+    filepath = 'uploads/{post_id}/{random_string}{ext}'.format(
+        post_id=str(instance.post.id), random_string=rand_str, ext=file_extension
     )
     return filepath
 
@@ -28,12 +28,6 @@ class BlogPost(models.Model):
         editable=False,
         auto_created=True,
         verbose_name=_("ID"),
-    )
-    image = models.ImageField(
-        upload_to=upload_location,
-        null=True,
-        blank=True,
-        verbose_name=_("Image")
     )
     title = models.CharField(
         max_length=500,
@@ -76,10 +70,46 @@ class BlogPost(models.Model):
         verbose_name_plural = _("Blog Posts")
 
     def __str__(self):
-        return self.slug
+        return str(self.id)
 
 
-@receiver(post_delete, sender=BlogPost)
+class PostImage(models.Model):
+    id = models.UUIDField(
+        default=uuid.uuid4,
+        primary_key=True,
+        editable=False,
+        auto_created=True,
+        verbose_name=_("ID"),
+    )
+    image = models.ImageField(
+        upload_to=upload_location,
+        null=True,
+        blank=True,
+        verbose_name=_("Image")
+    )
+    post = models.ForeignKey(
+        BlogPost,
+        on_delete=models.CASCADE,
+        verbose_name=_("Post")
+    )
+    date_added = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_("Date Added")
+    )
+    last_updated = models.DateTimeField(
+        auto_now=True,
+        verbose_name=_("Date Updated")
+    )
+
+    class Meta:
+        verbose_name = _("Post Image")
+        verbose_name_plural = _("Post Images")
+
+    def __str__(self):
+        return str(self.id)
+
+
+@receiver(post_delete, sender=PostImage)
 def submission_delete(sender, instance, **kwargs):
     instance.image.delete(False)
 

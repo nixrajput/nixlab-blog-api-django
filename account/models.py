@@ -155,7 +155,7 @@ class Account(AbstractBaseUser):
     objects = MyAccountManager()
 
     def __str__(self):
-        return self.username
+        return str(self.id)
 
     class Meta:
         verbose_name = _("User")
@@ -219,4 +219,4 @@ class ProfilePicture(models.Model):
         verbose_name_plural = _("Profile Pictures")
 
     def __str__(self):
-        return self.image.name
+        return str(self.id)

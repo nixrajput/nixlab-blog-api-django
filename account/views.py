@@ -319,7 +319,7 @@ def upload_profile_picture_view(request):
             data['uploaded_at'] = profile_pic.uploaded_at
             return Response(data=data, status=status.HTTP_200_OK)
         data["response"] = "error"
-        data["message"] = serializer.errors
+        data["message"] = serializer.errors.__str__()
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -347,7 +347,7 @@ def update_account_view(request):
             data['last_updated'] = account.last_updated
             return Response(data=data, status=status.HTTP_200_OK)
         data["response"] = "error"
-        data["message"] = serializer.errors
+        data["message"] = serializer.errors.__str__()
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 

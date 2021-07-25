@@ -71,7 +71,7 @@ class LoginSerializer(Serializer):
 class ProfilePictureSerializer(ModelSerializer):
     class Meta:
         model = ProfilePicture
-        fields = ['id', 'image']
+        fields = ["id", "image", "user"]
 
 
 class ProfilePictureUploadSerializer(ModelSerializer):
@@ -97,17 +97,17 @@ class ProfilePictureUploadSerializer(ModelSerializer):
 
 
 class AccountDetailSerializer(ModelSerializer):
-    profile_picture = SerializerMethodField()
+    img_url = SerializerMethodField()
 
     class Meta:
         model = Account
         fields = [
             'id', 'first_name', 'last_name', 'phone', 'username', 'email',
-            'about', 'dob', 'is_valid', 'gender', "followers", "following",
-            'profile_picture', 'account_type', 'date_joined', 'last_login'
+            'about', 'dob', 'gender', "followers", "following", 'img_url',
+            'is_valid', 'account_type', 'date_joined', 'last_login'
         ]
 
-    def get_profile_picture(self, obj):
+    def get_img_url(self, obj):
         try:
             image = ProfilePicture.objects.filter(user=obj.id).order_by('-uploaded_at')[0]
         except (ProfilePicture.DoesNotExist, IndexError):
@@ -115,7 +115,7 @@ class AccountDetailSerializer(ModelSerializer):
 
         serializer = ProfilePictureSerializer(image)
 
-        return serializer.data
+        return serializer.data["image"]
 
 
 class AccountPropertiesSerializer(ModelSerializer):

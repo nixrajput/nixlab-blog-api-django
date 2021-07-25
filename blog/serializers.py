@@ -1,27 +1,36 @@
 from rest_framework.exceptions import ValidationError
-from rest_framework.serializers import ModelSerializer, SerializerMethodField
-
+from rest_framework.serializers import (
+    ModelSerializer,
+    SerializerMethodField,
+    ListField,
+    FileField
+)
 from account.models import ProfilePicture
 from account.serializers import ProfilePictureSerializer
-from blog.models import BlogPost
+from blog.models import BlogPost, PostImage
 
-IMAGE_SIZE_MAX_BYTES = 1024 * 1024 * 2
-DOES_NOT_EXIST = "DOES_NOT_EXIST"
+
+class PostImageSerializer(ModelSerializer):
+    class Meta:
+        model = PostImage
+        fields = ["id", "image", "post"]
 
 
 class BlogPostSerializer(ModelSerializer):
     author_name = SerializerMethodField()
     author_username = SerializerMethodField()
     author_id = SerializerMethodField()
+    author_img_url = SerializerMethodField()
     like_count = SerializerMethodField()
     is_liked = SerializerMethodField()
-    profile_pic_url = SerializerMethodField()
+    image_urls = SerializerMethodField()
 
     class Meta:
         model = BlogPost
         fields = [
-            "id", "title", "image", "slug", "likes", "like_count", "date_published", "last_updated",
-            "is_liked", "author_name", "author_username", "author_id", "profile_pic_url"
+            "id", "title", "image_urls", "author_id", "author_name", "author_username",
+            "author_img_url", "slug", "likes", "like_count", "is_liked", "date_published",
+            "last_updated"
         ]
 
     def get_author_name(self, obj):
@@ -33,15 +42,25 @@ class BlogPostSerializer(ModelSerializer):
     def get_author_id(self, obj):
         return obj.author.id
 
-    def get_profile_pic_url(self, obj):
+    def get_image_urls(self, obj):
+        try:
+            post_images = PostImage.objects.filter(post=obj.id).order_by('date_added')
+        except (PostImage.DoesNotExist, IndexError):
+            post_images = None
+
+        serializer = PostImageSerializer(post_images, many=True)
+
+        return [data["image"] for data in serializer.data]
+
+    def get_author_img_url(self, obj):
         try:
             image = ProfilePicture.objects.filter(user=obj.author.id).order_by('-uploaded_at')[0]
         except (ProfilePicture.DoesNotExist, IndexError):
-            image = ""
+            image = None
 
         serializer = ProfilePictureSerializer(image)
 
-        return serializer.data
+        return serializer.data["image"]
 
     def get_like_count(self, obj):
         return obj.likes.count()
@@ -55,7 +74,7 @@ class BlogPostSerializer(ModelSerializer):
 class BlogPostUpdateSerializer(ModelSerializer):
     class Meta:
         model = BlogPost
-        fields = ["title", "image"]
+        fields = ["title"]
 
     # def validate(self, blog_post):
     #     try:
@@ -90,32 +109,36 @@ class BlogPostUpdateSerializer(ModelSerializer):
 
 
 class BlogPostCreateSerializer(ModelSerializer):
+    image_files = ListField(child=FileField(allow_empty_file=False, use_url=False))
+
     class Meta:
         model = BlogPost
-        fields = ["title", "image", "author"]
+        fields = ["title", "image_files", "author"]
 
     def validate(self, data):
-        if not data.get('image'):
-            raise ValidationError({'image': 'This field is required.'})
         if not data.get('author'):
-            raise ValidationError({'author': 'This field is required.'})
+            raise ValidationError('Author field is required.')
         if not data.get('title'):
             data['title'] = None
+
         return data
 
     def save(self):
         author = self.validated_data['author']
+
         if self.validated_data['title'] is not None:
             title = self.validated_data['title']
         else:
             title = None
-        image = self.validated_data['image']
 
         blog_post = BlogPost(
             author=author,
-            title=title,
-            image=image
+            title=title
         )
-
         blog_post.save()
+
+        image_files = self.validated_data.pop('image_files')
+        for img in image_files:
+            PostImage.objects.create(post=blog_post, image=img)
+
         return blog_post
