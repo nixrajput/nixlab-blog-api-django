@@ -125,6 +125,16 @@ class AccountPropertiesSerializer(ModelSerializer):
             "dob", 'gender', "about"
         ]
 
+    def validate(self, data):
+        if not data.get('first_name'):
+            raise ValidationError({'first_name': 'This field is required.'})
+        if not data.get('last_name'):
+            raise ValidationError({'last_name': 'This field is required.'})
+        if data.get('phone') and len(data.get('phone')) < 10:
+            raise ValidationError({'email': 'Phone number is invalid.'})
+
+        return data
+
 
 class ChangePasswordSerializer(Serializer):
     old_password = CharField(required=True)
