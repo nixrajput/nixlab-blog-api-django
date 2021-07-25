@@ -142,6 +142,11 @@ class AccountPropertiesSerializer(ModelSerializer):
                 raise ValidationError({"dob": 'You must be older than 6 years old.'})
             data["dob"] = birthDate
 
+        if data.get('about'):
+            data["about"] = data["about"]
+        else:
+            data["about"] = None
+
         return data
 
 

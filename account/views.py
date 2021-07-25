@@ -117,7 +117,7 @@ def registration_view(request):
 
         else:
             data["response"] = "error"
-            data["message"] = serializer.errors
+            data["message"] = serializer.errors.__str__()
             return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -186,7 +186,7 @@ class ObtainAuthTokenView(APIView):
                 return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
         data['response'] = "error"
-        data["message"] = serializer.errors
+        data["message"] = serializer.errors.__str__()
         return Response(data, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -346,9 +346,11 @@ def update_account_view(request):
             data["user_id"] = account.id
             data['last_updated'] = account.last_updated
             return Response(data=data, status=status.HTTP_200_OK)
-        data["response"] = "error"
-        data["message"] = serializer.errors.__str__()
-        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            data["response"] = "error"
+            data["message"] = serializer.errors.__str__()
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET'])
