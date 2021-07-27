@@ -76,6 +76,30 @@ def api_detail_blog_view(request, post_id):
     return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(["POST"])
+@permission_classes((IsAuthenticated,))
+def api_create_blog_view(request):
+    if request.method == "POST":
+
+        req_data = request.data
+        req_data['author'] = request.user.id
+
+        serializer = BlogPostCreateSerializer(data=req_data)
+
+        data = {}
+        if serializer.is_valid():
+            blog_post = serializer.save()
+            data['response'] = "success"
+            data['id'] = blog_post.id
+            data['message'] = "Post created successfully."
+            return Response(data=data, status=status.HTTP_201_CREATED)
+
+        else:
+            data["response"] = "error"
+            data["message"] = serializer.errors.__str__()
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+
 @api_view(["PUT"])
 @permission_classes((IsAuthenticated,))
 def api_update_blog_view(request, post_id):
@@ -190,30 +214,6 @@ def api_like_toggle_view(request, post_id):
         data["response"] = "error"
         data["message"] = "An error occurred"
         return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
-
-
-@api_view(["POST"])
-@permission_classes((IsAuthenticated,))
-def api_create_blog_view(request):
-    if request.method == "POST":
-
-        req_data = request.data
-        req_data['author'] = request.user.id
-
-        serializer = BlogPostCreateSerializer(data=req_data)
-
-        data = {}
-        if serializer.is_valid():
-            blog_post = serializer.save()
-            data['response'] = "success"
-            data['id'] = blog_post.id
-            data['message'] = "Post created successfully."
-            return Response(data=data, status=status.HTTP_201_CREATED)
-
-        else:
-            data["response"] = "error"
-            data["message"] = serializer.errors.__str__()
-            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(['GET', ])

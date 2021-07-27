@@ -12,10 +12,8 @@ from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.authtoken.models import Token
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from rest_framework.generics import UpdateAPIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from account.models import Account
 from account.serializers import (
@@ -45,7 +43,7 @@ UPLOAD_SUCCESS = "SUCCESSFULLY_UPLOADED"
 @api_view(["POST"])
 @permission_classes([])
 @authentication_classes([])
-def registration_view(request):
+def api_registration_view(request):
     if request.method == "POST":
         data = {}
         email = request.data.get('email', '0')
@@ -141,13 +139,13 @@ def verify_account(request, user_id, token):
     return render(request, 'success.html', {'data': data})
 
 
-class ObtainAuthTokenView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [AllowAny]
+@api_view(["POST"])
+@permission_classes([AllowAny])
+@authentication_classes([TokenAuthentication])
+def api_login_view(request):
+    data = {}
 
-    def post(self, request):
-        data = {}
-
+    if request.method == "POST":
         serializer = LoginSerializer(data=request.data)
 
         username = request.data.get('username', '0')
@@ -193,7 +191,7 @@ class ObtainAuthTokenView(APIView):
 @api_view(["GET"])
 @permission_classes((IsAuthenticated,))
 @authentication_classes([TokenAuthentication])
-def detail_user_view(request, user_id):
+def api_user_detail_view(request, user_id):
     data = {}
 
     is_uuid = validate_uuid4(user_id)
@@ -303,7 +301,7 @@ def api_check_if_following_view(request, user_id):
 @api_view(["POST"])
 @permission_classes((IsAuthenticated,))
 @authentication_classes([TokenAuthentication])
-def upload_profile_picture_view(request):
+def api_upload_profile_picture_view(request):
     if request.method == "POST":
         req_data = request.data
         req_data['user'] = request.user.id
@@ -318,15 +316,17 @@ def upload_profile_picture_view(request):
             data['user_id'] = profile_pic.user.id
             data['uploaded_at'] = profile_pic.uploaded_at
             return Response(data=data, status=status.HTTP_200_OK)
-        data["response"] = "error"
-        data["message"] = serializer.errors.__str__()
-        return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            data["response"] = "error"
+            data["message"] = serializer.errors.__str__()
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
 @api_view(["PUT"])
 @permission_classes((IsAuthenticated,))
 @authentication_classes([TokenAuthentication])
-def update_account_view(request):
+def api_update_account_view(request):
     data = {}
 
     try:
@@ -356,7 +356,7 @@ def update_account_view(request):
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 @authentication_classes([TokenAuthentication])
-def is_account_complete_view(request):
+def api_is_account_complete_view(request):
     data = {}
 
     try:
@@ -385,43 +385,51 @@ def is_account_complete_view(request):
             return Response(data, status=status.HTTP_200_OK)
 
 
-class ChangePasswordView(UpdateAPIView):
-    serializer_class = ChangePasswordSerializer
-    model = Account
-    permission_classes = (IsAuthenticated,)
-    authentication_classes = (TokenAuthentication,)
+@api_view(["POST", "PUT"])
+@permission_classes([IsAuthenticated])
+@authentication_classes([TokenAuthentication])
+def api_change_password_view(request):
+    data = {}
 
-    def get_object(self, queryset=None):
-        obj = self.request.user
-        return obj
+    try:
+        user = Account.objects.get(id=request.user.id)
+    except Account.DoesNotExist:
+        data["response"] = "error"
+        data["message"] = "User not found."
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
-    def update(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        serializer = self.get_serializer(data=request.data)
+    if request.method == "POST" or request.method == "PUT":
+        serializer = ChangePasswordSerializer(data=request.data)
 
         if serializer.is_valid():
-            # Check old password
-            if not self.object.check_password(serializer.data.get("old_password")):
-                return Response({"old_password": ["Wrong password."]}, status=status.HTTP_400_BAD_REQUEST)
+            if not user.check_password(serializer.data.get("old_password")):
+                data["response"] = "error"
+                data["message"] = "Your old password is incorrect."
+                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-            # confirm the new passwords match
             new_password = serializer.data.get("new_password")
             confirm_new_password = serializer.data.get("confirm_new_password")
             if new_password != confirm_new_password:
-                return Response({"new_password": ["New passwords must match"]}, status=status.HTTP_400_BAD_REQUEST)
+                data["response"] = "error"
+                data["message"] = "New passwords do not match."
+                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
-            # set_password also hashes the password that the user will get
-            self.object.set_password(serializer.data.get("new_password"))
-            self.object.save()
-            return Response({"response": "successfully changed password"}, status=status.HTTP_200_OK)
+            user.set_password(serializer.data.get("new_password"))
+            user.save()
+            data["response"] = "success"
+            data["message"] = "Your password is changed."
+            return Response(data=data, status=status.HTTP_200_OK)
 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            data["response"] = "error"
+            data["message"] = serializer.errors.__str__()
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET', ])
+@api_view(['GET'])
 @permission_classes((IsAuthenticated,))
 @authentication_classes([TokenAuthentication])
-def account_properties_view(request):
+def api_account_properties_view(request):
     try:
         account = request.user
     except Account.DoesNotExist:
