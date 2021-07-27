@@ -426,20 +426,6 @@ def api_change_password_view(request):
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
-@api_view(['GET'])
-@permission_classes((IsAuthenticated,))
-@authentication_classes([TokenAuthentication])
-def api_account_properties_view(request):
-    try:
-        account = request.user
-    except Account.DoesNotExist:
-        return Response(status=status.HTTP_404_NOT_FOUND)
-
-    if request.method == 'GET':
-        serializer = AccountPropertiesSerializer(account)
-        return Response(serializer.data)
-
-
 def validate_email(email):
     try:
         account = Account.objects.get(email=email)
