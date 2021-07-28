@@ -4,6 +4,7 @@ import uuid
 from django.conf import settings
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.mail import send_mail
+from django.core.validators import RegexValidator
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -73,7 +74,14 @@ class Account(AbstractBaseUser):
     username = models.CharField(
         max_length=30,
         unique=True,
-        verbose_name=_("Username")
+        verbose_name=_("Username"),
+        validators=[
+           RegexValidator(
+               r'^[\w.-]+\Z',
+               _("Enter a valid username. This value may contain only "
+                 "letters, numbers and ./-/_ characters.")
+           )
+        ]
     )
     dob = models.DateField(
         blank=True,
