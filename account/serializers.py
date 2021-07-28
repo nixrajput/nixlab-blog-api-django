@@ -149,3 +149,9 @@ class ChangePasswordSerializer(Serializer):
     old_password = CharField(required=True)
     new_password = CharField(required=True)
     confirm_new_password = CharField(required=True)
+
+
+class ResetPasswordSerializer(Serializer):
+    otp = CharField(required=True)
+    new_password = CharField(required=True)
+    confirm_new_password = CharField(required=True)

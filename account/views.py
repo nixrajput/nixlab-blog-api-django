@@ -1,5 +1,7 @@
 import smtplib
+from datetime import datetime
 
+import pyotp
 from django.conf import settings
 from django.contrib.auth import authenticate
 from django.core.mail import send_mail
@@ -15,29 +17,19 @@ from rest_framework.decorators import api_view, permission_classes, authenticati
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
-from account.models import Account
+from account.models import Account, OTP
 from account.serializers import (
     RegistrationSerializer,
     AccountPropertiesSerializer,
     ChangePasswordSerializer,
     LoginSerializer,
     AccountDetailSerializer,
-    ProfilePictureUploadSerializer
+    ProfilePictureUploadSerializer,
+    ResetPasswordSerializer
 )
 from account.tokens import user_tokenizer
 from account.utils import token_expire_handler, expires_in
 from blog.utils import validate_uuid4
-
-DOES_NOT_EXIST = "DOES_NOT_EXIST"
-EMAIL_EXISTS = "EMAIL_EXISTS"
-USERNAME_EXISTS = "USERNAME_EXISTS"
-INVALID_EMAIL = "INVALID_EMAIL"
-INVALID_USERNAME = "INVALID_USERNAME"
-SUCCESS_TEXT = "SUCCESSFULLY_AUTHENTICATED"
-CREATION_TEXT = "SUCCESSFULLY_CREATED"
-INVALID_PASSWORD = "INVALID_PASSWORD"
-UPDATE_TEXT = "SUCCESSFULLY_UPDATED"
-UPLOAD_SUCCESS = "SUCCESSFULLY_UPLOADED"
 
 
 @api_view(["POST"])
@@ -97,8 +89,8 @@ def api_registration_view(request):
 
                 account.save()
 
-                data['response'] = "account_created"
-                data['mail_response'] = 'success'
+                data['response'] = "success"
+                data['mail_response'] = 'mail_sent'
                 data['mail_result'] = res
                 data['message'] = "Registration successful. A verification email has been sent to your email. Please " \
                                   "verify your account to complete registration. If you don't receive an email, " \
@@ -426,6 +418,120 @@ def api_change_password_view(request):
             return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
 
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def api_send_password_reset_otp_view(request):
+    data = {}
+
+    email = request.data.get('email', '0')
+
+    try:
+        user = Account.objects.get(email__iexact=email)
+    except Account.DoesNotExist:
+        data["response"] = "error"
+        data["message"] = "Account does not exist with this email address."
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "POST":
+        activation_key = GenerateKey.generate()
+
+        otp = OTP(
+            user=user,
+            otp=activation_key["otp"],
+            activation_key=activation_key["key"]
+        )
+
+        otp.save()
+
+        message = get_template('reset_password_otp.html').render({
+            'otp': activation_key["otp"],
+            'first_name': user.first_name,
+            'last_name': user.last_name,
+        })
+
+        subject = 'OTP for Reset Account Password - NixLab'
+
+        try:
+            res = send_mail(
+                auth_user=settings.EMAIL_HOST_USER,
+                auth_password=settings.EMAIL_HOST_PASSWORD,
+                subject=subject,
+                message='',
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[user.email],
+                html_message=message
+            )
+
+            print(res)
+            data['response'] = "success"
+            data['mail_response'] = 'mail_sent'
+            data['message'] = "OTP sent successfully to your email address."
+            return Response(data, status=status.HTTP_201_CREATED)
+        except (smtplib.SMTPException, TimeoutError) as exc:
+            data["response"] = "error"
+            data['mail_response'] = 'error'
+            data['message'] = "An error occurred while sending OTP email. Please check your email " \
+                              "address and try again."
+            data['error'] = str(exc)
+            return Response(data, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def api_reset_password_view(request):
+    data = {}
+
+    otp = request.data.get('otp', '0')
+
+    try:
+        otp_obj = OTP.objects.get(otp__iexact=otp)
+    except OTP.DoesNotExist:
+        data["response"] = "error"
+        data["message"] = "OTP is wrong or invalid."
+        return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+
+    if request.method == "POST":
+        try:
+            user = Account.objects.get(id=otp_obj.user.id)
+        except Account.DoesNotExist:
+            data["response"] = "error"
+            data["message"] = "User not found."
+            return Response(data=data, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = ResetPasswordSerializer(data=request.data)
+
+        if serializer.is_valid():
+
+            activation_key = otp_obj.activation_key
+            totp = pyotp.TOTP(activation_key, interval=86400)
+            is_verified = totp.verify(otp_obj.otp)
+
+            if is_verified:
+                new_password = serializer.data.get("new_password")
+                confirm_new_password = serializer.data.get("confirm_new_password")
+
+                if new_password != confirm_new_password:
+                    data["response"] = "error"
+                    data["message"] = "New passwords do not match."
+                    return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+                user.set_password(serializer.data.get("new_password"))
+                user.save()
+                otp_obj.delete()
+                data["response"] = "success"
+                data["message"] = "Your password is changed."
+                return Response(data=data, status=status.HTTP_200_OK)
+
+            else:
+                data["response"] = "error"
+                data["message"] = "This OTP is expired. Please try again to resend OTP to reset your password."
+
+        else:
+            data["response"] = "error"
+            data["message"] = serializer.errors.__str__()
+            return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
+
+
 def validate_email(email):
     try:
         account = Account.objects.get(email=email)
@@ -448,9 +554,18 @@ def validate_password(username, password):
     try:
         account = Account.objects.get(username=username)
     except Account.DoesNotExist:
-        raise ValueError(DOES_NOT_EXIST)
+        raise ValueError("Account does not exist.")
 
     if account.check_password(password):
         return True
     else:
         return False
+
+
+class GenerateKey:
+    @staticmethod
+    def generate():
+        secret = pyotp.random_base32()
+        totp = pyotp.TOTP(secret, interval=86400)
+        temp_otp = totp.now()
+        return {"key": secret, "otp": temp_otp}

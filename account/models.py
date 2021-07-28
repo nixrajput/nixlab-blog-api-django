@@ -76,11 +76,11 @@ class Account(AbstractBaseUser):
         unique=True,
         verbose_name=_("Username"),
         validators=[
-           RegexValidator(
-               r'^[\w.-]+\Z',
-               _("Enter a valid username. This value may contain only "
-                 "letters, numbers and ./-/_ characters.")
-           )
+            RegexValidator(
+                r'^[\w.-]+\Z',
+                _("Enter a valid username. This value may contain only "
+                  "letters, numbers and ./-/_ characters.")
+            )
         ]
     )
     dob = models.DateField(
@@ -228,3 +228,37 @@ class ProfilePicture(models.Model):
 
     def __str__(self):
         return str(self.id)
+
+
+class OTP(models.Model):
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        null=True,
+        verbose_name=_("user")
+    )
+
+    otp = models.IntegerField(
+        null=True,
+        blank=True,
+        verbose_name=_("OTP")
+    )
+
+    activation_key = models.CharField(
+        max_length=150,
+        blank=True,
+        null=True,
+        verbose_name=_("Activation Key")
+    )
+
+    added_at = models.DateTimeField(
+        auto_now_add=True,
+        verbose_name=_('Date Created'),
+    )
+
+    class Meta:
+        verbose_name = _("OTP")
+        verbose_name_plural = _("All OTP")
+
+    def __str__(self):
+        return str(self.user.id)

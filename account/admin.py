@@ -1,7 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import site
 
-from account.models import Account, ProfilePicture
+from account.models import Account, ProfilePicture, OTP
 
 
 class ProfilePictureInline(admin.TabularInline):
@@ -26,5 +26,13 @@ class AccountAdmin(admin.ModelAdmin):
     inlines = [ProfilePictureInline]
 
 
-site.register(Account, AccountAdmin)
+class OTPAdmin(admin.ModelAdmin):
+    model = OTP
+    readonly_fields = ["added_at"]
+    list_display = ["user", "otp", "added_at"]
+    search_fields = ["user", "otp"]
+
+
+admin.site.register(Account, AccountAdmin)
 admin.site.register(ProfilePicture, ProfilePictureAdmin)
+admin.site.register(OTP, OTPAdmin)
