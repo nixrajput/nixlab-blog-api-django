@@ -503,7 +503,7 @@ def api_reset_password_view(request):
         if serializer.is_valid():
 
             activation_key = otp_obj.activation_key
-            totp = pyotp.TOTP(activation_key, interval=86400)
+            totp = pyotp.TOTP(activation_key, interval=300)
             is_verified = totp.verify(otp_obj.otp)
 
             if is_verified:
@@ -566,6 +566,6 @@ class GenerateKey:
     @staticmethod
     def generate():
         secret = pyotp.random_base32()
-        totp = pyotp.TOTP(secret, interval=86400)
+        totp = pyotp.TOTP(secret, interval=300)
         temp_otp = totp.now()
         return {"key": secret, "otp": temp_otp}
