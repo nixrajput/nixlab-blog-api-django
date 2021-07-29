@@ -466,7 +466,7 @@ def api_send_password_reset_otp_view(request):
             data['response'] = "success"
             data['mail_response'] = 'mail_sent'
             data['message'] = "OTP sent successfully to your email address."
-            return Response(data, status=status.HTTP_201_CREATED)
+            return Response(data, status=status.HTTP_200_OK)
         except (smtplib.SMTPException, TimeoutError) as exc:
             data["response"] = "error"
             data['mail_response'] = 'error'
