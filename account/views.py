@@ -429,7 +429,7 @@ def api_send_password_reset_otp_view(request):
         user = Account.objects.get(email__iexact=email)
     except Account.DoesNotExist:
         data["response"] = "error"
-        data["message"] = "Account does not exist with this email address."
+        data["message"] = "Account doesn't exist with this email address."
         return Response(data=data, status=status.HTTP_404_NOT_FOUND)
 
     if request.method == "POST":
@@ -503,7 +503,7 @@ def api_reset_password_view(request):
         if serializer.is_valid():
 
             activation_key = otp_obj.activation_key
-            totp = pyotp.TOTP(activation_key, interval=30)
+            totp = pyotp.TOTP(activation_key, interval=3600)
             is_verified = totp.verify(otp_obj.otp)
 
             if is_verified:
@@ -568,6 +568,6 @@ class GenerateKey:
     @staticmethod
     def generate():
         secret = pyotp.random_base32()
-        totp = pyotp.TOTP(secret, interval=30)
+        totp = pyotp.TOTP(secret, interval=3600)
         temp_otp = totp.now()
         return {"key": secret, "otp": temp_otp}
