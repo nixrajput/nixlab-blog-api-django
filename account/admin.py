@@ -28,7 +28,7 @@ class AccountAdmin(admin.ModelAdmin):
 
 class OTPAdmin(admin.ModelAdmin):
     model = OTP
-    readonly_fields = ["added_at"]
+    readonly_fields = ["added_at", "expires_at"]
     list_display = ["user", "otp", "added_at"]
     search_fields = ["user", "otp"]
 

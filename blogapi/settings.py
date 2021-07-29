@@ -11,7 +11,7 @@ SECRET_KEY = '%%z8+6phy!#ee^v14^90!o6==lklc8ghpim4%m*%piznc-t@j&'
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['127.0.0.1', 'nixlab-blog-api.herokuapp.com']
+ALLOWED_HOSTS = ['127.0.0.1', 'nixlab-blog-api.herokuapp.com', 'nixlab.co.in']
 
 INSTALLED_APPS = [
     'django.contrib.admin',

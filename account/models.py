@@ -1,7 +1,9 @@
 import os
 import uuid
+from datetime import timedelta
 
 from django.conf import settings
+from django.utils import timezone
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 from django.core.mail import send_mail
 from django.core.validators import RegexValidator
@@ -10,7 +12,6 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.authtoken.models import Token
-
 
 class MyAccountManager(BaseUserManager):
     def create_user(self, first_name, last_name, email, username, password=None):
@@ -230,6 +231,10 @@ class ProfilePicture(models.Model):
         return str(self.id)
 
 
+def get_otp_expires_at():
+    return timezone.now() + timedelta(seconds=3600)
+
+
 class OTP(models.Model):
     user = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -238,7 +243,8 @@ class OTP(models.Model):
         verbose_name=_("user")
     )
 
-    otp = models.IntegerField(
+    otp = models.CharField(
+        max_length=10,
         null=True,
         blank=True,
         verbose_name=_("OTP")
@@ -254,6 +260,12 @@ class OTP(models.Model):
     added_at = models.DateTimeField(
         auto_now_add=True,
         verbose_name=_('Date Created'),
+    )
+
+    expires_at = models.DateTimeField(
+        editable=False,
+        default=get_otp_expires_at,
+        verbose_name=_('Expires At'),
     )
 
     class Meta:

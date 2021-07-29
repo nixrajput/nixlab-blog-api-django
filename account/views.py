@@ -503,7 +503,7 @@ def api_reset_password_view(request):
         if serializer.is_valid():
 
             activation_key = otp_obj.activation_key
-            totp = pyotp.TOTP(activation_key, interval=300)
+            totp = pyotp.TOTP(activation_key, interval=30)
             is_verified = totp.verify(otp_obj.otp)
 
             if is_verified:
@@ -525,6 +525,8 @@ def api_reset_password_view(request):
             else:
                 data["response"] = "error"
                 data["message"] = "This OTP is expired. Please try again to resend OTP to reset your password."
+                otp_obj.delete()
+                return Response(data=data, status=status.HTTP_400_BAD_REQUEST)
 
         else:
             data["response"] = "error"
@@ -566,6 +568,6 @@ class GenerateKey:
     @staticmethod
     def generate():
         secret = pyotp.random_base32()
-        totp = pyotp.TOTP(secret, interval=300)
+        totp = pyotp.TOTP(secret, interval=30)
         temp_otp = totp.now()
         return {"key": secret, "otp": temp_otp}
