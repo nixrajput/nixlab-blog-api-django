@@ -23,7 +23,7 @@ class ApiBlogListView(ListAPIView):
     serializer_class = BlogPostSerializer
     pagination_class = PageNumberPagination
     filter_backends = (SearchFilter, OrderingFilter)
-    search_fields = ('title', 'author__username')
+    search_fields = ('content', 'author__username')
 
     def get_queryset(self, *args, **kwargs):
         queryset = BlogPost.objects.filter(is_draft=False).order_by('-date_published')
@@ -38,7 +38,7 @@ class ApiUserBlogListView(ListAPIView):
     serializer_class = BlogPostSerializer
     pagination_class = PageNumberPagination
     filter_backends = (SearchFilter, OrderingFilter)
-    search_fields = ('title', 'author__username')
+    search_fields = ('content', 'author__username')
     lookup_url_kwarg = "uid"
 
     def get_queryset(self, *args, **kwargs):

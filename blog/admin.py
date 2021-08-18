@@ -14,7 +14,7 @@ class BlogPostAdmin(admin.ModelAdmin):
     model = BlogPost
     readonly_fields = ["date_published", "last_updated"]
     list_display = ["id", "author", "date_published"]
-    search_fields = ["slug", "title", "author"]
+    search_fields = ["slug", "content", "author"]
 
     inlines = [PostImageInline]
 

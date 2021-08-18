@@ -29,11 +29,11 @@ class BlogPost(models.Model):
         auto_created=True,
         verbose_name=_("ID"),
     )
-    title = models.CharField(
+    content = models.CharField(
         max_length=500,
         null=True,
         blank=True,
-        verbose_name=_("About")
+        verbose_name=_("Content")
     )
     author = models.ForeignKey(
         settings.AUTH_USER_MODEL,
@@ -116,8 +116,8 @@ def submission_delete(sender, instance, **kwargs):
 
 def pre_save_blog_post_receiver(sender, instance, *args, **kwargs):
     if not instance.slug:
-        rand_str = get_random_alphanumeric_string(16)
-        instance.slug = slugify(str(instance.title) + "-" + rand_str)
+        rand_str = get_random_alphanumeric_string(64)
+        instance.slug = slugify(rand_str)
 
 
 pre_save.connect(pre_save_blog_post_receiver, sender=BlogPost)
