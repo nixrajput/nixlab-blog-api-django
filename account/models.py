@@ -13,6 +13,7 @@ from django.dispatch import receiver
 from django.utils.translation import ugettext_lazy as _
 from rest_framework.authtoken.models import Token
 
+
 class MyAccountManager(BaseUserManager):
     def create_user(self, first_name, last_name, email, username, password=None):
         if not email:

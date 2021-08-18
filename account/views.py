@@ -1,5 +1,4 @@
 import smtplib
-from datetime import datetime
 
 import pyotp
 from django.conf import settings

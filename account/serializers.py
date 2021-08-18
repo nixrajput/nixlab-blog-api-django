@@ -107,7 +107,8 @@ class AccountDetailSerializer(ModelSerializer):
             'is_valid', 'account_type', 'date_joined', 'last_login'
         ]
 
-    def get_img_url(self, obj):
+    @staticmethod
+    def get_img_url(obj):
         try:
             image = ProfilePicture.objects.filter(user=obj.id).order_by('-uploaded_at')[0]
         except (ProfilePicture.DoesNotExist, IndexError):
@@ -133,7 +134,7 @@ class AccountPropertiesSerializer(ModelSerializer):
             raise ValidationError({'last_name': 'This field is required.'})
         if data.get('phone') and len(data.get('phone')) < 10:
             raise ValidationError({'email': 'Phone number is invalid.'})
-        if data.get('dob'):
+        if data.get('dob') and len(data.get('dob')) > 0:
             birthDate = datetime.strptime(str(data["dob"]), "%Y-%m-%d").date()
             today = date.today()
             age = today.year - birthDate.year - ((today.month, today.day) <
